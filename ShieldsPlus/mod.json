@@ -1,0 +1,157 @@
+{
+    "Groups": [
+      {
+        "Name": "Main",
+        "DisplayName": "Gameplay",
+        "Elements": [
+          {
+            "Name": "IncludeDir1",
+            "Description": [
+              "Select how monitors will handle shield distribution."
+            ],
+            "DisplayName": "Monitor Type",
+            "Type": "MonitorTypeEnum",
+            "MinValue": null,
+            "MaxValue": null,
+            "DefaultValue": ".\\MonitorType/Cycle\\"
+          },
+          {
+            "Name": "IncludeDir2",
+            "Description": [
+              "Change style of the Blue Shield (No effect on 3D Blast mode)."
+            ],
+            "DisplayName": "Blue Shield Design",
+            "Type": "BlueShieldEnum",
+            "MinValue": null,
+            "MaxValue": null,
+            "DefaultValue": ".\\BlueShieldDesign/CDShield\\"
+          },
+          {
+            "Name": "IncludeDir3",
+            "Description": [
+              "Keep shields between acts."
+            ],
+            "DisplayName": "Keep Shields",
+            "Type": "KeepShieldEnum",
+            "MinValue": null,
+            "MaxValue": null,
+            "DefaultValue": ".\\KeepShields/Reset\\"
+          }
+        ]
+      }
+    ],
+    "Enums": {
+      "MonitorTypeEnum": [
+        {
+          "DisplayName": "Shield Cycle (Default)",
+          "Value": ".\\MonitorType/Cycle\\",
+          "Description": [
+            "One monitor can give all shields depending of a cycle."
+          ]
+        },
+        {
+          "DisplayName": "Random",
+          "Value": ".\\MonitorType/Random\\",
+          "Description": [
+            "On load each shield monitor will change to a random shield."
+          ]
+        },
+        {
+          "DisplayName": "Shield Cycle (Gold shield)",
+          "Value": ".\\MonitorType/GCycle\\",
+          "Description": [
+            "One monitor can give all shields depending of a cycle, replaces blue shield with debug's Gold shield."
+          ]
+        },
+        {
+          "DisplayName": "Random (Gold shield)",
+          "Value": ".\\MonitorType/GRandom\\",
+          "Description": [
+            "On load each shield monitor will change to a random shield, replaces blue shield with debug's Gold shield"
+          ]
+        },
+        {
+          "DisplayName": "No Shield change",
+          "Value": ".\\MonitorType/NoCycle\\",
+          "Description": [
+            "S3 Shields are only accesible through Debug Mode."
+          ]
+        },
+        {
+          "DisplayName": "Shield Cycle (3D Blast)",
+          "Value": ".\\MonitorType/BlastCycle\\",
+          "Description": [
+            "One monitor can give all Sonic 3D Blast shields."
+          ]
+        },
+        {
+          "DisplayName": "Random (3D Blast)",
+          "Value": ".\\MonitorType/BlastRandom\\",
+          "Description": [
+            "On load each shield monitor will change to a random 3D Blast shield."
+          ]
+        },
+        {
+          "DisplayName": "No Shield change (3D Blast)",
+          "Value": ".\\MonitorType/BlastNoCycle\\",
+          "Description": [
+            "3D Blast Shields are only accesible through Debug Mode."
+          ]
+        }
+      ],
+      "BlueShieldEnum": [
+        {
+          "DisplayName": "Sonic CD (Default)",
+          "Value": ".\\BlueShieldDesign/CDShield\\",
+          "Description": [
+            "S1/CD Blue Shield."
+          ]
+        },
+        {
+          "DisplayName": "Sonic 2",
+          "Value": ".\\BlueShieldDesign/S2Shield\\",
+          "Description": [
+            "S2 Shield."
+          ]
+        },
+        {
+          "DisplayName": "Sonic 3D Blast",
+          "Value": ".\\BlueShieldDesign/BlastShield\\",
+          "Description": [
+            "3D Blast Shield (only visual)."
+          ]
+        },
+        {
+          "DisplayName": "Knuckles Chaotix",
+          "Value": ".\\BlueShieldDesign/ChaotixShield\\",
+          "Description": [
+            "Chaotix Blue Shield."
+          ]
+        }
+      ],
+      "KeepShieldEnum": [
+        {
+          "DisplayName": "False (default)",
+          "Value": ".\\KeepShields/Reset\\",
+          "Description": [
+            "Shields will no carry over between acts."
+          ]
+        },
+        {
+          "DisplayName": "Periods",
+          "Value": ".\\KeepShields/Periods\\",
+          "Description": [
+            "Shields will carry over between time periods."
+          ]
+        },
+        {
+          "DisplayName": "Acts and Periods",
+          "Value": ".\\KeepShields/ActsAndPeriods\\",
+          "Description": [
+            "Shields will carry over between acts and time travel."
+          ]
+        }
+      ]
+    },
+    "IniFile": "mod.ini"
+  }

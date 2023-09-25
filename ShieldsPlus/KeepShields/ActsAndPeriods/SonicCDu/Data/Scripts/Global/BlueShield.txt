@@ -1,0 +1,1396 @@
+//----------------Sonic CD Blue Shield Script-----------------//
+//--------Scripted by Christian Whitehead 'The Taxman'--------//
+//-------Unpacked By Rubberduckycooly's Script Unpacker-------//
+
+// Aliases
+#alias Object.Value0	:	Object.AnimTimer
+#alias Object.Value2	:	Object.Timer
+#alias Object.Value3	:	Object.CurFrame
+#alias Object.Value5	:	Object.ResetSheetFlag
+#alias Object.Value6	:	Object.HomingXRange
+#alias Object.Value7	:	Object.HomingYRange
+
+// Player Aliases
+#alias Player.Value0	:	Player.Rings
+#alias Player.Value1	:	Player.AbilityTimer
+#alias Player.Value4	:	Player.InvincibleTimer
+#alias Player.Value8	:	Player.ScrollDelay
+#alias Player.Value10	:	Player.JumpAbility
+#alias Player.Value14	:	Player.DropDashCharge
+
+// Bullet Aliases
+#alias Object.Value1	:	Object.XVelocity
+#alias Object.Value2	:	Object.YVelocity
+
+#alias Object.Value0	:	LoseRing.XVelocity
+#alias Object.Value1	:	LoseRing.YVelocity
+
+// Player List Pos Aliases
+#alias 0	:	PLAYER_SONIC
+#alias 1	:	PLAYER_TAILS
+
+// Priority
+#alias 1	:	PRIORITY_ACTIVE
+#alias 2	:	PRIORITY_ALWAYS
+
+// Collision Modes
+#alias 0	:	CMODE_FLOOR
+#alias 1	:	CSIDE_LWALL
+#alias 2	:	CSIDE_RWALL
+#alias 3	:	CSIDE_ROOF
+
+// Shield type
+#alias 0	:	INSTA_SHIELD
+#alias 1	:	BLUE_SHIELD
+#alias 2	:	FIRE_SHIELD
+#alias 3	:	BUBBLE_SHIELD
+#alias 4	:	LIGHTNING_SHIELD
+#alias 5	:	GOLD_SHIELD
+
+#alias 6	:	BLAST_BLUE_SHIELD
+#alias 7	:	BLAST_RED_SHIELD
+
+// Blue Shield possesion Property Value
+#alias 1	:	ACTIVE_SHIELD
+
+// States
+#alias 0	:	SHIELD_SETUP
+
+#alias 1	:	FIRESHIELD_ANIM
+#alias 2	:	FIRESHIELD_DASH_SETUP
+#alias 3	:	FIRESHIELD_DASH_ATTACK
+
+#alias 1	:	BUBBLESHIELD_ANIM
+#alias 2	:	BUBBLESHIELD_BOUNCE_SETUP
+#alias 3	:	BUBBLESHIELD_BOUNCE_ANIM
+#alias 4	:	BUBBLESHIELD_G_SETUP
+#alias 5	:	BUBBLESHIELD_G_ANIM
+
+#alias 1	:	LIGHTNING_SHIELD_ANIM
+
+#alias 2	:	BLAST_ATTACK_AFTERIMAGE
+
+// Property Values
+#alias 2	:	SHIELD_AFTERIMAGE
+
+#alias 2	:	INK_ALPHA
+
+#alias 0	:	GRAVITY_GROUND
+#alias 1	:	GRAVITY_AIR
+
+#alias 4	:	CAMERASTYLE_HLOCKED
+
+#alias 0	:	FLIP_NONE
+#alias 1	:	FLIP_X
+#alias 2	:	FLIP_Y
+
+// Damage Type
+#alias 1	:	DAMAGE_SHIELDED
+#alias 2	:	DAMAGE_HURT
+#alias 3	:	DAMAGE_DEATH
+
+// Shield status
+#alias 0	:	NO_SHIELD
+
+// Collision Planes
+#alias 0	:	COLLISION_PLANE_A
+
+// Global SFX
+#alias 4	:	SFX_G_LOSERINGS
+#alias 5	:	SFX_G_HURT
+#alias 36	:	SFX_G_FIREDASH
+#alias 38	:	SFX_G_BUBBLEBOUNCE
+#alias 40	:	SFX_G_LIGHTNINGJUMP
+#alias 41	:	SFX_G_INSTASHIELD
+
+// Warp Destination
+#alias 0	:	WARPDEST_NONE
+
+// Mission Functions
+#alias 8	:	RULE_MERCY_BADNIKS
+
+#alias Object[24].PropertyValue	:	HUD.CurrentTimePeriod
+
+#alias 0	:	TIME_PRESENT
+#alias 1	:	TIME_PAST
+#alias 2	:	TIME_GOOD_FUTURE
+#alias 3	:	TIME_BAD_FUTURE
+
+#function Player_Hit
+#function Player_State_GotHit
+#function Player_State_AirControlLock
+#function Player_Action_DblJumpSonic
+#function Player_State_BubbleBounce
+#function Player_State_BlastAttack
+#function Player_State_Static
+#function Shield_Deflect
+#function Player_State_CheckHoming
+
+#function BlueShield_SetPalette
+#function BlueShieldDX_SetPalette
+#function GoldShield_SetPalette
+#function RedShield_SetPalette
+
+function BlueShield_SetPalette
+	CopyPalette(0,6)
+	LoadPalette("ShieldsPlus.act", 6, 59, 5, 10)
+	LoadPalette("ShieldsPlus.act", 6, 92, 31, 32)
+	CopyPalette(6,0)
+	LoadPalette("ShieldsPlus.act", 1, 59, 5, 10)
+	LoadPalette("ShieldsPlus.act", 1, 92, 31, 32)
+	LoadPalette("ShieldsPlus.act", 2, 59, 5, 10)
+	LoadPalette("ShieldsPlus.act", 2, 92, 31, 32)
+	LoadPalette("ShieldsPlus.act", 3, 59, 5, 10)
+	LoadPalette("ShieldsPlus.act", 3, 92, 31, 32)
+	LoadPalette("ShieldsPlus.act", 4, 59, 5, 10)
+	LoadPalette("ShieldsPlus.act", 4, 92, 31, 32)
+	LoadPalette("ShieldsPlus.act", 5, 59, 5, 10)
+	LoadPalette("ShieldsPlus.act", 5, 92, 31, 32)
+	LoadPalette("ShieldsPlus.act", 7, 92, 31, 32)
+	switch HUD.CurrentTimePeriod
+	case TIME_PRESENT
+		LoadPalette("ShieldsPlus.act", 7, 59, 21, 26)
+		break
+	case TIME_PAST
+		LoadPalette("ShieldsPlus.act", 7, 59, 37, 42)
+		break
+	case TIME_GOOD_FUTURE
+		LoadPalette("ShieldsPlus.act", 7, 59, 53, 58)
+		break
+	case TIME_BAD_FUTURE
+		LoadPalette("ShieldsPlus.act", 7, 59, 69, 74)
+		break
+	end switch
+end function
+
+function BlueShieldDX_SetPalette
+	CopyPalette(0,6)
+	LoadPalette("ShieldsPlus.act", 6, 59, 10, 15)
+	LoadPalette("ShieldsPlus.act", 6, 92, 31, 32)
+	CopyPalette(6,0)
+	LoadPalette("ShieldsPlus.act", 1, 59, 10, 15)
+	LoadPalette("ShieldsPlus.act", 1, 92, 31, 32)
+	LoadPalette("ShieldsPlus.act", 2, 59, 10, 15)
+	LoadPalette("ShieldsPlus.act", 2, 92, 31, 32)
+	LoadPalette("ShieldsPlus.act", 3, 59, 10, 15)
+	LoadPalette("ShieldsPlus.act", 3, 92, 31, 32)
+	LoadPalette("ShieldsPlus.act", 4, 59, 10, 15)
+	LoadPalette("ShieldsPlus.act", 4, 92, 31, 32)
+	LoadPalette("ShieldsPlus.act", 5, 59, 10, 15)
+	LoadPalette("ShieldsPlus.act", 5, 92, 31, 32)
+	LoadPalette("ShieldsPlus.act", 7, 92, 31, 32)
+	switch HUD.CurrentTimePeriod
+	case TIME_PRESENT
+		LoadPalette("ShieldsPlus.act", 7, 59, 21, 26)
+		break
+	case TIME_PAST
+		LoadPalette("ShieldsPlus.act", 7, 59, 37, 42)
+		break
+	case TIME_GOOD_FUTURE
+		LoadPalette("ShieldsPlus.act", 7, 59, 53, 58)
+		break
+	case TIME_BAD_FUTURE
+		LoadPalette("ShieldsPlus.act", 7, 59, 69, 74)
+		break
+	end switch
+end function
+
+function RedShield_SetPalette
+	CopyPalette(0,6)
+	LoadPalette("ShieldsPlus.act", 6, 59,  96, 101)
+	LoadPalette("ShieldsPlus.act", 6, 92, 101, 102)
+	CopyPalette(6,0)
+	LoadPalette("ShieldsPlus.act", 1, 59, 96, 101)
+	LoadPalette("ShieldsPlus.act", 1, 92, 101, 102)
+	LoadPalette("ShieldsPlus.act", 2, 59, 96, 101)
+	LoadPalette("ShieldsPlus.act", 2, 92, 101, 102)
+	LoadPalette("ShieldsPlus.act", 3, 59, 96, 101)
+	LoadPalette("ShieldsPlus.act", 3, 92, 101, 102)
+	LoadPalette("ShieldsPlus.act", 4, 59, 96, 101)
+	LoadPalette("ShieldsPlus.act", 4, 92, 101, 102)
+	LoadPalette("ShieldsPlus.act", 5, 59, 96, 101)
+	LoadPalette("ShieldsPlus.act", 5, 92, 101, 102)
+	switch HUD.CurrentTimePeriod
+	case TIME_PRESENT
+		LoadPalette("ShieldsPlus.act", 7, 59, 112, 117)
+		LoadPalette("ShieldsPlus.act", 7, 92, 117, 118)
+		break
+	case TIME_PAST
+		LoadPalette("ShieldsPlus.act", 7, 59, 128, 133)
+		LoadPalette("ShieldsPlus.act", 7, 92, 133, 134)
+		break
+	case TIME_GOOD_FUTURE
+		LoadPalette("ShieldsPlus.act", 7, 59, 144, 149)
+		LoadPalette("ShieldsPlus.act", 7, 92, 149, 150)
+		break
+	case TIME_BAD_FUTURE
+		LoadPalette("ShieldsPlus.act", 7, 59, 160, 165)
+		LoadPalette("ShieldsPlus.act", 7, 92, 165, 166)
+		break
+	end switch
+end function
+
+function GoldShield_SetPalette
+	CopyPalette(0,6)
+	LoadPalette("ShieldsPlus.act", 6, 59, 0, 5)
+	LoadPalette("ShieldsPlus.act", 6, 92, 31, 32)
+	CopyPalette(6,0)
+	LoadPalette("ShieldsPlus.act", 1, 59, 0, 5)
+	LoadPalette("ShieldsPlus.act", 1, 92, 31, 32)
+	LoadPalette("ShieldsPlus.act", 2, 59, 0, 5)
+	LoadPalette("ShieldsPlus.act", 2, 92, 31, 32)
+	LoadPalette("ShieldsPlus.act", 3, 59, 0, 5)
+	LoadPalette("ShieldsPlus.act", 3, 92, 31, 32)
+	LoadPalette("ShieldsPlus.act", 4, 59, 0, 5)
+	LoadPalette("ShieldsPlus.act", 4, 92, 31, 32)
+	LoadPalette("ShieldsPlus.act", 5, 59, 0, 5)
+	LoadPalette("ShieldsPlus.act", 5, 92, 31, 32)
+	LoadPalette("ShieldsPlus.act", 7, 92, 31, 32)
+	switch HUD.CurrentTimePeriod
+	case TIME_PRESENT
+		LoadPalette("ShieldsPlus.act", 7, 59, 16, 21)
+		break
+	case TIME_PAST
+		LoadPalette("ShieldsPlus.act", 7, 59, 32, 37)
+		break
+	case TIME_GOOD_FUTURE
+		LoadPalette("ShieldsPlus.act", 7, 59, 48, 53)
+		break
+	case TIME_BAD_FUTURE
+		LoadPalette("ShieldsPlus.act", 7, 59, 64, 69)
+		break
+	end switch
+end function
+
+
+function Player_State_CheckHoming
+	if Player.JumpAbility == Player_Action_DblJumpSonic
+		if Player.State == Player_State_Air
+			CheckResult = false
+			if Player.XPos < Object.XPos
+				if Player.Direction == FACING_RIGHT
+					PlayerObjectCollision(C_TOUCH, -128, -128, Object.HomingXRange, Object.HomingYRange)
+				end if
+			else
+				FlipSign(Object.HomingXRange)
+				if Player.Direction == FACING_LEFT
+					PlayerObjectCollision(C_TOUCH, Object.HomingXRange, -128, 128, Object.HomingYRange)
+				end if
+			end if
+
+			if CheckResult == true
+				Player.TargetPos = Object.EntityNo
+			else
+				if Player.TargetPos == Object.EntityNo
+					Player.TargetPos = -1
+				end if
+			end if
+		end if
+	end if
+end function
+
+function Shield_Deflect
+	TempValue0  = Player.XPos
+	TempValue0 -= Object.XPos
+	TempValue1  = Player.YPos
+	TempValue1 -= Object.YPos
+	ATan2(TempValue2, TempValue0, TempValue1)
+	Sin256(TempValue0, TempValue2)
+	Cos256(TempValue1, TempValue2)
+	Object.XVelocity  = TempValue1
+	Object.XVelocity *= -0x800
+	Object.YVelocity  = TempValue0
+	Object.YVelocity *= -0x800
+end function
+
+function Player_State_Static
+	if Stage.PlayerListPos == PLAYER_SONIC
+		Player.JumpAbility = Player_Action_DblJumpSonic
+	end if
+	CheckResult = false
+endfunction
+
+function Player_Hit
+	ArrayPos0  = Player.EntityNo
+	ArrayPos0 += 2
+	if Object[ArrayPos0].Type != TypeName[Invincibility]
+		if Player.InvincibleTimer == 0
+			Player.State = Player_State_GotHit
+			if Player.XPos > Object.XPos
+				Player.Speed =  0x20000
+			else
+				Player.Speed = -0x20000
+			end if
+		end if
+	end if
+endfunction
+
+function Player_State_GotHit
+
+#platform: Use_Origins
+	TempValue1 = false
+	if game.playMode == BOOT_PLAYMODE_MISSION
+		if game.missionFunctionNo == RULE_MERCY_BADNIKS
+			if game.missionValue == 1
+				game.missionValue = 0
+				TempValue1 = true
+			end if
+		end if
+	end if
+#endplatform
+
+	ArrayPos0  = Player.EntityNo
+	ArrayPos0 += 2
+	if Object[ArrayPos0].PropertyValue > NO_SHIELD
+		TempValue0 = DAMAGE_SHIELDED
+		Player.Shield = INSTA_SHIELD
+		ResetObjectEntity(ArrayPos0, TypeName[Blank Object], 0, 0, 0)
+		PlaySfx(SFX_G_HURT, false)
+	else
+		if Player.Rings == 0
+			PlaySfx(SFX_G_HURT, false)
+			TempValue0 = DAMAGE_DEATH
+		else
+#platform: Use_Origins
+			if TempValue1 == false
+				PlaySfx(SFX_G_LOSERINGS, false)
+				TempValue0 = DAMAGE_HURT
+			end if
+#endplatform
+
+#platform: Use_Standalone
+			PlaySfx(SFX_G_LOSERINGS, false)
+			TempValue0 = DAMAGE_HURT
+#endplatform
+		end if
+	end if
+
+#platform: Use_Origins
+	if TempValue1 != false
+		TempValue0 = DAMAGE_DEATH
+	end if
+#endplatform
+
+	switch TempValue0
+	case DAMAGE_SHIELDED
+		Player.State	 = Player_State_Hurt
+		Player.Animation = ANI_HURT
+		Player.YVelocity = -0x40000
+		Player.Gravity	 = GRAVITY_AIR
+
+		Player.TrackScroll  = true
+		Player.InvincibleTimer	= 8000
+		if Player.GravityStrength == 0x1000
+			Player.Speed	 >>= 1
+			Player.YVelocity >>= 1
+		end if
+		break
+	case DAMAGE_HURT
+		if Player.CollisionPlane == COLLISION_PLANE_A
+			TempValue4 = 3
+		else
+			TempValue4 = 1
+		end if
+		Player.State			= Player_State_Hurt
+		Player.Animation		= ANI_HURT
+		Player.YVelocity		= -0x40000
+		Player.Gravity			= GRAVITY_AIR
+		Player.TrackScroll		= true
+		Player.InvincibleTimer	= 8000
+
+		if Player.GravityStrength == 0x1000
+			Player.Speed	 >>= 1
+			Player.YVelocity >>= 1
+		end if
+		// Lose ring code
+		TempValue0 = Player.Rings
+		if TempValue0 > 16
+			TempValue1  = TempValue0
+			TempValue1 -= 16
+			TempValue0  = 16
+		else
+			TempValue1 = 0
+		end if
+
+		if TempValue1 > 16
+			TempValue1 = 16
+		end if
+		
+		TempValue3   = TempValue1
+		TempValue3 >>= 1
+		TempValue3 <<= 5
+
+		TempValue2  = 384
+		TempValue2 -= TempValue3
+
+		TempValue3 >>= 4
+		if TempValue3 == TempValue1
+			TempValue2 += 16
+		else
+			TempValue2 -= 16
+		end if
+
+		TempValue3 = 0
+		while TempValue3 < TempValue1
+			CreateTempObject(TypeName[Lose Ring], Player.CollisionPlane, Player.XPos, Player.YPos)
+			Cos(LoseRing[TempObjectPos].XVelocity, TempValue2)
+			Sin(LoseRing[TempObjectPos].YVelocity, TempValue2)
+			LoseRing[TempObjectPos].XVelocity	<<= 8
+			LoseRing[TempObjectPos].YVelocity	<<= 8
+			Object[TempObjectPos].DrawOrder		  = TempValue4
+			Object[TempObjectPos].AnimationSpeed  = 256
+			TempValue3++
+			TempValue2 += 32
+		loop
+
+		TempValue3   = TempValue0
+		TempValue3 >>= 1
+		TempValue3 <<= 5
+
+		TempValue2  = 384
+		TempValue2 -= TempValue3
+
+		TempValue3 >>= 4
+		if TempValue3 == TempValue0
+			TempValue2 += 16
+		else
+			TempValue2 -= 16
+		end if
+		TempValue3 = 0
+
+		while TempValue3<TempValue0
+			CreateTempObject(TypeName[Lose Ring], Player.CollisionPlane, Player.XPos, Player.YPos)
+			Cos(LoseRing[TempObjectPos].XVelocity, TempValue2)
+			Sin(LoseRing[TempObjectPos].YVelocity, TempValue2)
+			LoseRing[TempObjectPos].XVelocity	<<= 9
+			LoseRing[TempObjectPos].YVelocity	<<= 9
+			Object[TempObjectPos].DrawOrder		  = TempValue4
+			Object[TempObjectPos].AnimationSpeed  = 256
+			TempValue3++
+			TempValue2 += 32
+		loop
+		Player.Rings = 0
+		Ring.ExtraLife = 100
+		break
+
+	case DAMAGE_DEATH
+		Object.DrawOrder = 5
+		Player.Speed	 = 0
+		Player.YVelocity = -0x70000
+		Player.XVelocity = 0
+		Player.State	 = Player_State_Death
+		Player.Animation = ANI_DYING
+
+		Player.TileCollisions	 = false
+		Player.ObjectInteraction = false
+		if Player.EntityNo == 0	// Check if it's was player 1 who died......what?
+			Screen.CameraEnabled = false
+		end if
+		break
+
+	end switch
+
+	// lose your warp-run if you receive damage
+	if Warp.Destination > WARPDEST_NONE
+		if Warp.Timer > 99
+			if Warp.Timer < 204
+				Warp.Destination = WARPDEST_NONE
+			end if
+		end if
+		Warp.Timer = 0
+	end if
+end function
+
+function Player_State_AirControlLock
+	if Player.JumpAbility != Player_Action_DblJumpSonic
+		Player.Left  = false
+		Player.Right = false
+	end if
+#platform: Use_Origins
+	if Player.Shield == INSTA_SHIELD
+		CallFunction(Player_HandleDropDash)
+	end if
+#endplatform
+
+	CallFunction(Player_HandleAirFriction)
+	if Player.Gravity == GRAVITY_AIR
+		CallFunction(Player_HandleAirMovement)
+	else
+#platform: Use_Origins
+		if Player.DropDashCharge >= 20
+			CallFunction(Player_Action_Spindash_S2)
+		else
+			Player.State	= Player_State_Ground
+			CallFunction(Player_HandleOnGround)
+			Player.Skidding = 0
+		end if
+#endplatform
+
+#platform: Use_Standalone
+		Player.State	= Player_State_Ground
+		CallFunction(Player_HandleOnGround)
+		Player.Skidding = 0
+#endplatform
+	end if
+endfunction
+
+function Player_Action_DblJumpSonic
+	ArrayPos0  = Player.EntityNo
+	ArrayPos0 += 2
+	if Object[ArrayPos0].Type != TypeName[Invincibility]
+		if Player.JumpPress == true
+			switch Player.Shield
+			case INSTA_SHIELD
+				PlaySfx(SFX_G_INSTASHIELD, false)
+				if Object[ArrayPos0].Type == TypeName[Blank Object]
+					ResetObjectEntity(ArrayPos0, TypeName[Ring Sparkle], 2, 0, 0)
+					Object[ArrayPos0].Priority = PRIORITY_ACTIVE
+				end if
+				
+				Object[ArrayPos0].State = 0
+				
+				Player.State = Player_State_AirControlLock
+				break
+
+			case BLUE_SHIELD
+			case BLAST_BLUE_SHIELD
+			case BLAST_RED_SHIELD
+				CheckResult = false
+				break
+
+			case FIRE_SHIELD
+				PlaySfx(SFX_G_FIREDASH, false)
+				GetBit(TempValue0, Object.Direction, 0)
+				if TempValue0 == 0
+					Player.XVelocity = 0x80000
+				else
+					Player.XVelocity = -0x80000
+				end if
+				Player.Speed = Player.XVelocity
+				Player.ScrollDelay = 15
+				Screen.CameraStyle = CAMERASTYLE_HLOCKED
+				Player.YVelocity = 0
+				Player.State = Player_State_AirControlLock
+				Object[ArrayPos0].State	 = FIRESHIELD_DASH_SETUP
+				Object[ArrayPos0].Direction = Player.Direction
+				break
+
+			case BUBBLE_SHIELD
+				PlaySfx(SFX_G_BUBBLEBOUNCE, false)
+				Player.YVelocity = 0x80000
+				Player.XVelocity = 0
+				Player.Speed = Player.XVelocity
+				Player.State = Player_State_BubbleBounce
+				Object[ArrayPos0].State = BUBBLESHIELD_BOUNCE_SETUP
+				break
+
+			case LIGHTNING_SHIELD
+				PlaySfx(SFX_G_LIGHTNINGJUMP, false)
+				Player.YVelocity = -0x58000
+				CreateTempObject(TypeName[Ring Sparkle], 1, Player.XPos, Player.YPos)
+				Object[TempObjectPos].Value2 = -0x20000
+				Object[TempObjectPos].Value3 = -0x20000
+				CreateTempObject(TypeName[Ring Sparkle], 1, Player.XPos, Player.YPos)
+				Object[TempObjectPos].Value2 = 0x20000
+				Object[TempObjectPos].Value3 = -0x20000
+				CreateTempObject(TypeName[Ring Sparkle], 1, Player.XPos, Player.YPos)
+				Object[TempObjectPos].Value2 = -0x20000
+				Object[TempObjectPos].Value3 = 0x20000
+				CreateTempObject(TypeName[Ring Sparkle], 1, Player.XPos, Player.YPos)
+				Object[TempObjectPos].Value2 = 0x20000
+				Object[TempObjectPos].Value3 = 0x20000
+				Player.State = Player_State_AirControlLock
+				break
+
+			case GOLD_SHIELD
+				if Player.TargetPos != -1
+					Player.State = Player_State_BlastAttack
+					Object.Timer = 0
+				else
+					Player.YVelocity = 0x80000
+					Player.State = Player_State_AirControlLock
+				end if
+				break
+			end switch
+		end if
+	else
+		CheckResult = false
+	end if
+endfunction
+
+function Player_State_BubbleBounce
+	CallFunction(Player_HandleAirFriction)
+	if Player.Gravity == GRAVITY_AIR
+		CallFunction(Player_HandleAirMovement)
+	else
+		Player.Gravity = GRAVITY_AIR
+		if Player.AbilityTimer == 0x38000
+			TempValue1 = -0x40000
+		else
+			TempValue1 = -0x78000
+		end if
+		TempValue1 += Player.GravityStrength
+		Sin256(Player.XVelocity, Player.Angle)
+		Player.XVelocity  *= TempValue1
+		Cos256(TempValue0, Player.Angle)
+		TempValue0		  *= Player.Speed
+		Player.XVelocity  += TempValue0
+		Player.XVelocity >>= 8
+		Sin256(Player.YVelocity, Player.Angle)
+		Player.YVelocity  *= Player.Speed
+		Cos256(TempValue0, Player.Angle)
+		TempValue0		  *= TempValue1
+		Player.YVelocity   = TempValue0
+		Player.YVelocity >>= 8
+		Player.Speed 	   = Player.XVelocity
+		Player.TrackScroll = true
+
+		Player.Animation = ANI_JUMPING
+		Player.Angle = 0
+		Player.CollisionMode = CMODE_FLOOR
+		Player.AbilityTimer = 1
+		
+		CallFunction(Player_HandleRollAnimSpeed)
+		Player.State = Player_State_Air_NoDropDash
+		PlaySfx(SFX_G_BUBBLEBOUNCE, false)
+		ArrayPos0  = Player.EntityNo
+		ArrayPos0 += 2
+		Object[ArrayPos0].State = BUBBLESHIELD_G_SETUP
+	end if
+endfunction
+
+
+function Player_State_BlastAttack
+	ArrayPos0 = Player.TargetPos
+	TempValue0 = Object[ArrayPos0].XPos
+	TempValue1 = Object[ArrayPos0].YPos
+	Player.Speed = 0
+	Player.XVelocity = 0
+	Player.YVelocity = 0
+	if TempValue0 < Player.XPos
+		Player.Speed = -0x20000
+		if Player.XVelocity >= 0
+			Player.speed *= 2
+		end if
+	else
+		Player.speed = 0x20000
+		if Player.XVelocity >= 0
+			Player.speed *= 2
+		end if
+	end if
+	Player.XVelocity  += Player.speed
+	Player.XVelocity <<= 2
+
+	TempValue0  = Object[ArrayPos0].XPos
+	TempValue0 -= Player.XPos
+	TempValue1  = Object[ArrayPos0].YPos
+	TempValue1 -= Player.ypos
+	ATan2(TempValue2, TempValue0, TempValue1)
+	Sin256(TempValue1, TempValue2)
+	TempValue1 <<= 12
+	Player.YVelocity  = TempValue1
+	if Player.TargetPos == -1
+		if Player.Direction == FACING_RIGHT
+			Player.Speed	 = -0x10000
+			Player.XVelocity = -0x10000
+		else
+			Player.Speed	 = 0x10000
+			Player.XVelocity = 0x10000
+		end if
+		Player.YVelocity = -0x80000
+		Player.State = Player_State_Air_NoDropDash
+	end if
+
+	if player.Gravity == GRAVITY_GROUND
+		Player.State = Player_State_Roll
+		CallFunction(Player_HandleOnGround)
+		Player.Skidding = 0
+	end if
+
+	if Player.Direction == FACING_RIGHT
+		ObjectTileGrip(CSIDE_LWALL, -5, -2, Player.CollisionPlane)
+		TempValue0 = CheckResult
+		ObjectTileGrip(CSIDE_LWALL, -5, 11, Player.CollisionPlane)
+		TempValue1 = CheckResult
+	else
+		Player.Direction = FACING_LEFT
+		ObjectTileGrip(CSIDE_RWALL, 4, -2, Player.CollisionPlane)
+		TempValue0 = CheckResult
+		ObjectTileGrip(CSIDE_RWALL, 4, 11, Player.CollisionPlane)
+		TempValue1 = CheckResult
+	end if
+
+	CheckResult  = TempValue0
+	CheckResult &= TempValue1
+	if CheckResult == true
+		Player.State = Player_State_Air_NoDropDash
+		Player.Skidding = 0
+	end if
+endfunction
+
+sub ObjectMain
+	if Object.PropertyValue != SHIELD_AFTERIMAGE
+		if Player.State == Player_State_GotHit
+			TempValue0 = 1
+			Player.Shield = INSTA_SHIELD
+			ResetObjectEntity(2, TypeName[Blank Object], 0, 0, 0)
+		end if
+
+		if Stage.PlayerListPos == PLAYER_SONIC
+			Player.JumpAbility = Player_Action_DblJumpSonic
+		end if
+
+		if Player.State == Player_State_Death
+			ResetObjectEntity(2, TypeName[Blank Object], 0, 0, 0)
+			Player.Shield = INSTA_SHIELD
+		end if
+
+		if Player.State == Player_State_Drown
+			ResetObjectEntity(2, TypeName[Blank Object], 0, 0, 0)
+			Player.Shield = INSTA_SHIELD
+		end if
+
+		if Object[0].Type != TypeName[Debug Mode]
+			if Player.AirTimer > 0
+				if Player.Shield == FIRE_SHIELD
+					Player.Shield = INSTA_SHIELD
+					ResetObjectEntity(2, TypeName[Blank Object], 0, 0, 0)
+				end if
+				if Player.Shield == LIGHTNING_SHIELD
+					Player.Shield = INSTA_SHIELD
+					ResetObjectEntity(2, TypeName[Blank Object], 0, 0, 0)
+				end if
+			end if
+		end if
+
+		switch Player.Shield
+		case FIRE_SHIELD
+			switch Object.State
+			case SHIELD_SETUP
+				Object.AnimationTimer = 0
+				Object.Timer = 0
+				Object.Direction = FLIP_NONE
+				Object.DrawOrder = Player.DrawOrder
+				Object.State++
+				break
+
+			case FIRESHIELD_ANIM
+				Object.AnimationTimer++
+				if Object.AnimationTimer >= 3
+					Object.AnimationTimer = 1
+					Object.Timer++
+					Object.DrawOrder ^= 7
+					if Object.Timer >= 10
+						Object.Direction = FLIP_Y
+						if Object.Timer >= 18
+							Object.Timer = 0
+							Object.Direction = FLIP_NONE
+						end if
+					end if
+				end if
+				break
+
+			case FIRESHIELD_DASH_SETUP
+				Object.AnimationTimer = 0
+				Object.Timer = 0
+				Object.Frame = 10
+				Object.DrawOrder = Player.DrawOrder
+				Object.State++
+			case FIRESHIELD_DASH_ATTACK
+				Object.AnimationTimer++
+				if Object.AnimationTimer >= 3
+					Object.AnimationTimer = 1
+					Object.Timer++
+					if Object.Timer >= 12
+						Object.State = SHIELD_SETUP
+					end if
+				end if
+				break
+			end switch
+			break
+
+		case BUBBLE_SHIELD
+			Player.AirTimer = 0
+			Object.DrawOrder = Player.DrawOrder
+			switch Object.State
+			case SHIELD_SETUP
+				Object.AnimationTimer = 0
+				Object.Timer = 0
+				Object.Frame = 16
+				Object.State++
+			case BUBBLESHIELD_ANIM
+				Object.AnimationTimer++
+				if Object.AnimationTimer >= 2
+					Object.AnimationTimer = 0
+					Object.Timer++
+					if Object.Timer >= 54
+						Object.Timer = 0
+					end if
+				end if
+				break
+
+			case BUBBLESHIELD_BOUNCE_SETUP
+				Object.AnimationTimer = 0
+				Object.Timer = 0
+				Object.Frame = 14
+				Object.State++
+			case BUBBLESHIELD_BOUNCE_ANIM
+				if Object.Timer == 0
+					Object.AnimationTimer++
+					if Object.AnimationTimer >= 5
+						Object.Frame = 22
+						Object.AnimationTimer = 0
+						Object.Timer++
+					end if
+				else
+					Object.AnimationTimer++
+					if Object.AnimationTimer >= 19
+						Object.State = SHIELD_SETUP
+					end if
+				end if
+				break
+
+			case BUBBLESHIELD_G_SETUP
+				Object.AnimationTimer = 0
+				Object.Timer = 0
+				Object.Frame = 21
+				Object.State++
+			case BUBBLESHIELD_G_ANIM
+				if Object.Timer == 0
+					Object.AnimationTimer++
+					if Object.AnimationTimer >= 13
+						Object.Frame = 22
+						Object.AnimationTimer = 0
+						Object.Timer++
+					end if
+				else
+					Object.AnimationTimer++
+					if Object.AnimationTimer >= 7
+						Object.State = SHIELD_SETUP
+					end if
+				end if
+				break
+			end switch
+			break
+
+		case LIGHTNING_SHIELD
+			switch Object.State
+			case SHIELD_SETUP
+				Object.Timer = 0
+				Object.AnimTimer = 0
+				Object.AnimationTimer = 4
+				Object.Direction = FLIP_NONE
+				Object.DrawOrder = Player.DrawOrder
+				Object.State++
+				break
+			case LIGHTNING_SHIELD_ANIM
+				Object.AnimationTimer--
+				if Object.AnimationTimer <= 0
+					Object.Timer++
+					Object.AnimTimer++
+
+					if Object.Timer > 8
+						Object.AnimationTimer = 2
+					else
+						Object.AnimationTimer = 4
+					end if
+
+					if Object.Timer >= 12
+						Object.Timer = 0
+					end if
+
+					if Object.AnimTimer >= 24
+						Object.AnimTimer = 0
+					end if
+
+					switch Object.AnimTimer
+					case 5
+					case 6
+					case 7
+					case 8
+					case 12
+					case 13
+					case 14
+					case 15
+						Object.Direction = FLIP_X
+						break
+					default
+						Object.Direction = FLIP_NONE
+					end switch
+
+					switch Object.AnimTimer
+					case 12
+					case 13
+					case 14
+					case 15
+					case 16
+					case 17
+					case 18
+					case 19
+					case 20
+						Object.DrawOrder = 3
+						break
+					default
+						Object.DrawOrder = Player.DrawOrder
+					end switch
+				end if
+				break
+			end switch
+		break
+		end switch
+	end if
+end sub
+
+
+sub ObjectDraw
+	if Warp.Timer == 0
+		if Player.Visible == true
+			switch Player.Shield
+			case BLAST_BLUE_SHIELD
+			case BLAST_RED_SHIELD
+				switch Object.State
+				case SHIELD_SETUP
+					Object.Frame = 37
+					if Player.Shield == BLAST_BLUE_SHIELD
+						CallFunction(BlueShield_SetPalette)
+					else
+						CallFunction(RedShield_SetPalette)
+					end if
+					Object.State++
+					break
+				case 1
+					Object.Frame++
+					if Object.Frame > 52
+						Object.Frame = 37
+					end if
+					break
+				end switch
+				break
+			case BLUE_SHIELD
+				switch Object.State
+				case SHIELD_SETUP
+					switch Game.BlueShieldDesign
+					case 0
+						Object.Frame = 31
+						Object.Timer = 0
+						Object.DrawOrder = Player.DrawOrder
+						break
+					case 1
+						object.frame   = object.timer
+						object.frame >>= 1
+						object.frame  += 53
+						break
+					case 2
+						Object.Frame = 37
+						CallFunction(BlueShield_SetPalette)
+						break
+					case 3
+						Object.Frame = 59
+						Object.Timer = 0
+						Object.DrawOrder = Player.DrawOrder
+						break
+					end switch
+					Object.State++
+					break
+				case 1
+					switch Game.BlueShieldDesign
+					case 0
+						Object.Timer++
+						if Object.Timer == 2
+							Object.Timer = 0
+							Object.Frame++
+							if Object.Frame > 36
+								Object.Frame = 31
+							end if
+						end if
+						break
+					case 1
+						Object.Frame = Object.timer
+						Object.Frame >>= 1
+						Object.Frame += 53
+						Object.Timer++
+						Object.Timer %= 10
+						Object.DrawOrder = Player.DrawOrder
+						break
+					case 2
+						Object.Frame++
+						if Object.Frame > 52
+							Object.Frame = 37
+						end if
+						break
+					case 3
+						Object.Timer++
+						if Object.Timer == 1
+							Object.Timer = 0
+							Object.Frame++
+							if Object.Frame > 76
+								Object.Frame = 59
+							end if
+						end if
+						break
+					end switch
+					break
+				end switch
+				break
+			case FIRE_SHIELD
+				if Object.State < 2
+					switch Object.Timer
+					case 0
+					case 16
+						Object.Frame = 0
+						break
+					case 1
+					case 17
+						Object.Frame = 1
+						break
+					case 2
+					case 14
+						Object.Frame = 2
+						break
+					case 3
+					case 15
+						Object.Frame = 3
+						break
+					case 4
+					case 12
+						Object.Frame = 4
+						break
+					case 5
+					case 13
+						Object.Frame = 5
+						break
+					case 6
+					case 10
+						Object.Frame = 6
+						break
+					case 7
+					case 11
+						Object.Frame = 7
+						break
+					case 8
+						Object.Frame = 8
+						break
+					case 9
+						Object.Frame = 9
+						break
+					end switch
+				else
+					switch Object.Timer
+					case 0
+					case 3
+					case 6
+					case 9
+						Object.Frame = 10
+						break
+					case 1
+					case 7
+						Object.Frame = 11
+						break
+					case 2
+					case 4
+					case 8
+					case 10
+						Object.Frame = 12
+						break
+					case 5
+					case 11
+						Object.Frame = 13
+						break
+					end switch
+				end if
+				break
+
+			case BUBBLE_SHIELD
+				if Object.State < BUBBLESHIELD_BOUNCE_SETUP
+					switch Object.Timer
+					case 1
+					case 3
+					case 5
+					case 13
+					case 15
+					case 17
+					case 25
+					case 27
+					case 29
+					case 37
+					case 39
+					case 41
+					case 49
+					case 51
+					case 53
+						Object.Frame = 14
+						break
+					case 7
+					case 9
+					case 11
+					case 19
+					case 21
+					case 23
+					case 31
+					case 33
+					case 35
+					case 43
+					case 45
+					case 47
+						Object.Frame = 15
+						break
+					case 0
+					case 2
+					case 4
+					case 48
+					case 50
+					case 52
+						Object.Frame = 16
+						break
+					case 6
+					case 8
+					case 10
+					case 42
+					case 44
+					case 46
+						Object.Frame = 17
+						break
+					case 12
+					case 14
+					case 16
+					case 36
+					case 38
+					case 40
+						Object.Frame = 18
+						break
+					case 18
+					case 20
+					case 22
+					case 30
+					case 32
+					case 34
+						Object.Frame = 19
+						break
+					case 24
+					case 26
+					case 28
+						Object.Frame = 20
+						break
+					end switch
+				end if
+				Object.Direction = FLIP_NONE
+					if Object.Timer >= 30
+						if Object.Frame > 16
+							Object.Direction = FLIP_Y
+						end if
+					end if
+				break
+
+			case LIGHTNING_SHIELD
+				switch Object.Timer
+				case 0
+				case 8
+					Object.Frame = 23
+					break
+				case 1
+				case 7
+					Object.Frame = 24
+					break
+				case 2
+				case 6
+					Object.Frame = 25
+					break
+				case 3
+				case 5
+					Object.Frame = 26
+					break
+				case 4
+					Object.Frame = 27
+					break
+				case 9
+					Object.Frame = 28
+					break
+				case 10
+					Object.Frame = 29
+					break
+				case 11
+					Object.Frame = 30
+					break
+				end switch
+				break
+
+			case GOLD_SHIELD
+				if Object.PropertyValue != SHIELD_AFTERIMAGE
+					if object.state == SHIELD_SETUP
+						Object.Frame = 37
+						Object.State++
+						CallFunction(GoldShield_SetPalette)
+					end if
+
+					Object.Frame++
+					if Object.Frame > 52
+						Object.Frame = 37
+					end if
+
+					if Player.State == Player_State_BlastAttack
+						CreateTempObject(TypeName[BlueShield], SHIELD_AFTERIMAGE, Player.XPos, Player.YPos)
+						Object[TempObjectPos].State		= BLAST_ATTACK_AFTERIMAGE
+						Object[TempObjectPos].InkEffect = INK_ALPHA
+						Object[TempObjectPos].Alpha		= 256
+						Object[TempObjectPos].DrawOrder = 4
+						Object[TempObjectPos].Frame = Object.Frame
+					end if
+				else
+					Object.Alpha -= 16
+					if Object.Alpha == 128
+						Object.Alpha = 256
+						Object.Type = TypeName[Blank Object]
+					end if
+					if Player.State == Player_State_GotHit
+						Object.Type = TypeName[Blank Object]
+					end if
+				end if
+			
+				break
+			end switch
+			
+			if Object.PropertyValue != SHIELD_AFTERIMAGE
+				if Player.Shield == BLUE_SHIELD
+					switch Game.BlueShieldDesign
+					case 0
+					case 2
+						DrawSpriteFX(Object.Frame, FX_INK, Player.XPos, Player.YPos)
+						break
+					case 1
+						DrawSpriteFX(Object.Frame, FX_INK, Player.XPos, Player.YPos)
+						DrawSpriteFX(58, FX_INK, Player.XPos, Player.YPos)
+						break
+					case 3
+						DrawSpriteFX(Object.Frame, FX_FLIP, Player.XPos, Player.YPos)
+						break
+					end switch
+				else
+					DrawSpriteFX(Object.Frame, FX_FLIP, Player.XPos, Player.YPos)
+				end if
+			else
+				DrawSpriteFX(Object.Frame, FX_INK, Object.XPos, Object.YPos)
+			end if
+		end if
+	end if
+end sub
+
+
+sub ObjectStartup
+	LoadSpriteSheet("Global/Items4.gif")
+	SpriteFrame(-16,9,37,15,1,1)		   // FS 0 (0)
+	SpriteFrame(-20,-24,39,15,1,17)		   // FS 1 (1)
+	SpriteFrame(-20,3,40,21,1,33)		   // FS 2 (2)
+	SpriteFrame(-23,-24,47,23,1,55)	       // FS 3 (3)
+	SpriteFrame(-24,-9,48,29,1,79)		   // FS 4 (4)
+	SpriteFrame(-24,-19,48,27,1,109)	   // FS 5 (5)
+	SpriteFrame(-24,-15,48,28,1,137)	   // FS 6 (6)
+	SpriteFrame(-24,-21,48,34,1,166)	   // FS 7 (7)
+	SpriteFrame(-23,-17,46,32,1,201)	   // FS 8 (8)
+	SpriteFrame(-24,-22,48,42,42,1)		   // FS 9 (9)
+	SpriteFrame(-4,-21,20,43,50,44) 	   // FS Attack 10 (10)
+	SpriteFrame(-24,-23,48,46,71,44)	   // FS Attack 11 (11)
+	SpriteFrame(-32,-19,56,38,120,44)	   // FS Attack 12 (12)
+	SpriteFrame(-40,-24,63,47,177,44)	   // FS Attack 13 (13)
+	SpriteFrame(-24, -24, 48, 48, 50, 91)  // BBS 14 (0)
+	SpriteFrame(-24, -24, 48, 48, 99, 91)  // BBS 15 (1)
+	SpriteFrame(-16, -23, 32, 7, 91, 1)    // BBS 16 (2)
+	SpriteFrame(-20, -22, 40, 12, 91, 9)   // BBS 17 (3)
+	SpriteFrame(-22, -22, 44, 20, 91, 22)  // BBS 18 (4)
+	SpriteFrame(-23, -20, 46, 19, 1, 234)  // BBS 19 (5)
+	SpriteFrame(-23, -15, 46, 30, 136, 1)  // BBS 20 (6)
+	SpriteFrame(-36, -16, 72, 32, 183, 1)  // BBS Attack 21 (7)
+	SpriteFrame(-28, -20, 56, 40, 48, 213) // BBS Attack 22 (8)
+	SpriteFrame(-8, -24, 31, 48, 148, 92)  // TS 23 (0)
+	SpriteFrame(-1, -24, 24, 48, 180, 92)  // TS 24 (1)
+	SpriteFrame(-8, -24, 31, 48, 205, 92)  // TS 25 (2)
+	SpriteFrame(-8, -24, 32, 48, 197, 141) // TS 26 (3)
+	SpriteFrame( -8, -24, 16, 48, 237,  92) // TS 27 (4)
+	SpriteFrame(-24, -24, 48, 48,  50, 140) // TS 28 (5)
+	SpriteFrame(-24, -24, 48, 48,  99, 140) // TS 29 (6)
+	SpriteFrame(-24, -24, 48, 48, 148, 141) // TS 30 (7)
+	SpriteFrame(-24, -24, 48, 48, 109, 196)	// BS 31 (0)
+	SpriteFrame(  0,   0,  0,  0, 109, 196)	// BS 32 (1)
+	SpriteFrame(-24, -24, 48, 48, 158, 196) // BS 33 (2)
+	SpriteFrame(  0,   0,  0,  0, 109, 196)	// BS 34 (3)
+	SpriteFrame(-24, -24, 48, 48, 207, 196) // BS 35 (4)
+	SpriteFrame(  0,   0,  0,  0, 109, 196)	// BS 36 (5)
+
+	SpriteFrame(-24, -24, 48, 48,   1,   254) // GS 37 (0)
+	SpriteFrame(  0,   0,  0,  0,   0,   0)	// GS 38 (1)
+	SpriteFrame(-24, -24, 48, 48,  50,   254) // GS 39 (2)
+	SpriteFrame(  0,   0,  0,  0,   0,   0)	// GS 40 (3)
+	SpriteFrame(-24, -24, 48, 48,  99,   254) // GS 41 (4)
+	SpriteFrame(  0,   0,  0,  0,   0,   0)	// GS 42 (5)
+	SpriteFrame(-24, -24, 48, 48, 148,   254) // GS 43 (6)
+	SpriteFrame(  0,   0,  0,  0,   0,   0)	// GS 44 (7)
+	SpriteFrame(-24, -24, 48, 48,   1,  303) // GS 45 (8)
+	SpriteFrame(  0,   0,  0,  0,   0,   0)	// GS 46 (9)
+	SpriteFrame(-24, -24, 48, 48,  50,  303) // GS 47 (10)
+	SpriteFrame(  0,   0,  0,  0,   0,   0)	// GS 48 (11)
+	SpriteFrame(-24, -24, 48, 48,  99,  303) // GS 49 (12)
+	SpriteFrame(  0,   0,  0,  0,   0,   0)	// GS 50 (13)
+	SpriteFrame(-24, -24, 48, 48, 148,  303) // GS 51 (14)
+	SpriteFrame(  0,   0,  0,  0,   0,   0)	// GS 52 (15)
+	// S2 Shield
+	SpriteFrame(-16, -16, 32, 32, 1, 352)	// BS 53 (0)
+	SpriteFrame(-16, -16, 32, 32, 100, 352)	// BS 54 (1)
+	SpriteFrame(-16, -16, 32, 32, 34, 352) // BS 55 (2)
+	SpriteFrame(-16, -16, 32, 32, 133, 352)	// BS 56 (3)
+	SpriteFrame(-16, -16, 32, 32, 67, 352) // BS 57 (4)
+	SpriteFrame(-24, -24, 48, 48, 165, 352)	// BS 58 (5)
+
+	// Chaotix Shield
+	SpriteFrame(-23, -25, 46, 50, 1, 403)	// CS 59 (0)
+	SpriteFrame(  0,   0,  0,  0, 0, 0)		// CS 60 (1)
+	SpriteFrame(-20, -25, 39, 48, 48, 403)	// CS 61 (2)
+	SpriteFrame(  0,   0,  0,  0, 0, 0)		// CS 62 (3)
+	SpriteFrame(-15, -25, 29, 50, 88, 403)	// CS 63 (4)
+	SpriteFrame(  0,   0,  0,  0, 0, 0)		// CS 64 (5)
+	SpriteFrame( -9, -25, 18, 50, 118, 403)	// CS 65 (6)
+	SpriteFrame(  0,   0,  0,  0, 0, 0)		// CS 66 (7)
+	SpriteFrame( -3, -25,  6, 50, 137, 403)	// CS 67 (8)
+	SpriteFrame(  0,   0,  0,  0, 0, 0)		// CS 68 (9)
+	SpriteFrame( -9, -25, 18, 50, 144, 403)	// CS 69 (10)
+	SpriteFrame(  0,   0,  0,  0, 0, 0)		// CS 70 (11)
+	SpriteFrame(-15, -25, 29, 50, 163, 403)	// CS 71 (12)
+	SpriteFrame(  0,   0,  0,  0, 0, 0)		// CS 72 (13)
+	SpriteFrame(-20, -25, 39, 48, 193, 403)	// CS 73 (14)
+	SpriteFrame(  0,   0,  0,  0, 0, 0)		// CS 74 (15)
+	SpriteFrame(-26, -25, 51, 50, 1, 454)	// CS 75 (16)
+	SpriteFrame(  0,   0,  0,  0, 0, 0)		// CS 76 (17)
+
+	Player.TargetPos = -1
+	if Stage.ActNo == 1
+		CheckEqual(Warp.XPos, 0)
+		TempValue0  = CheckResult
+		CheckLower(LampPost.Check, 32)
+		TempValue0 &= CheckResult
+		if TempValue0 == true
+			Player.Shield = 0
+		end if
+	end if
+
+	if Player.Shield != 0
+		Object[2].PropertyValue = ACTIVE_SHIELD
+		Object[2].Type		= TypeName[Blue Shield]
+		Object[2].State		= 0
+		Object[2].Value5	= true
+		Object[2].Priority	= PRIORITY_ACTIVE
+		Object[2].DrawOrder = 4
+		Object[2].InkEffect = INK_ALPHA
+		Object[2].Alpha		= 160
+		Object[2].XPos		= Player.XPos
+		Object[2].YPos		= Player.YPos
+	end if
+
+	LoadPalette("ShieldsPlus.act", 0, 90, 15, 16)
+	LoadPalette("ShieldsPlus.act", 0, 92, 31, 32)
+	LoadPalette("ShieldsPlus.act", 0, 59, 0, 5)
+	LoadPalette("ShieldsPlus.act", 0, 59, 0, 5)
+	CopyPalette(0, 6)
+end sub
+
+sub RSDK
+	LoadSpriteSheet("Global/Display.gif")
+	SetEditorIcon(Icon0,SingleIcon,-16,-16,32,32,1,143)
+end sub

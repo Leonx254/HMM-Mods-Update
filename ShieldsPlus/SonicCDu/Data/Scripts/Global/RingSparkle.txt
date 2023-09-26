@@ -1,0 +1,144 @@
+//----------------Sonic CD Ring Sparkle Script----------------//
+//--------Scripted by Christian Whitehead 'The Taxman'--------//
+//-------Unpacked By Rubberduckycooly's Script Unpacker-------//
+
+// Aliases
+#alias Object.Value0	:	Object.Timer
+// Value1 is skipped over
+#alias Object.Value2	:	Object.MissionTypeEX
+
+// Ring Reset Aliases
+#alias Object.Value0	:	Object.TimeCheckpoint
+
+// States
+#alias 0	:	SP_SETUP
+#alias 1	:	SP_DRAW
+
+// Property Values
+#alias 0	:	RING_SPARKLE
+#alias 1	:	LIGHTNING_SHIELD_SPARK
+#alias 2	:	INSTA_SHIELD_SPIN
+
+// Priority Aliases
+#alias 1	:	PRIORITY_ACTIVE
+
+// Rule Aliases
+#alias 10	:	RULE_RESPAWN_RINGS
+
+
+sub ObjectMain
+	switch Object.PropertyValue
+	case RING_SPARKLE
+		Object.Timer++
+		if Object.Timer == 6
+			Object.Timer = 0
+			Object.Frame++
+			if Object.Frame == 4
+				Object.Type  = TypeName[Blank Object]
+				Object.Frame = 0
+#platform: Use_Origins
+				if game.playMode == BOOT_PLAYMODE_MISSION
+					// Set during "M079 - Ring Challenge 100"
+					if game.missionFunctionNo == RULE_RESPAWN_RINGS
+						
+						// Turn into the Ring Reset object
+						// -> MissionTypeEX is set in the Ring Reset script
+						Object.Type = Object.MissionTypeEX
+						
+						// Take the current time + 20 and set it to this object's Time Checkpoint
+						Object.TimeCheckpoint  = Stage.Minutes
+						Object.TimeCheckpoint *= 60
+						Object.TimeCheckpoint += Stage.Seconds
+						Object.TimeCheckpoint += 20
+						
+						// While as a Ring Reset object, this object should always be updating before turning back into a Ring object
+						Object.Priority = PRIORITY_ACTIVE
+						
+					end if
+				end if
+#endplatform
+			end if
+		end if
+		break
+	case LIGHTNING_SHIELD_SPARK
+		switch Object.State
+		case SP_SETUP
+			Object.Frame = 4
+			Object.State++
+			break
+		case SP_DRAW
+			Object.DrawOrder = Object[0].DrawOrder
+			Object.XPos += Object.Value2
+			Object.YPos += Object.Value3
+			Object.Frame++
+			if Object.Frame >= 7
+				Object.Frame = 4
+			end if
+			Object.AnimationTimer++
+			if Object.AnimationTimer >= 22
+				Object.Type = TypeName[Blank Object]
+			end if
+			break
+		end switch
+		break
+	case INSTA_SHIELD_SPIN
+		switch Object.State
+		case SP_SETUP
+			Object.Frame = 7
+			Object.State++
+			break
+		case SP_DRAW
+			Object.drawOrder = 4
+			Object.Frame++
+			if Object.frame >= 14
+				Object.frame = 7
+				ArrayPos0  = Player.EntityNo
+				ArrayPos0 += 2
+				ResetObjectEntity(ArrayPos0, TypeName[BlankObject], 0, 0, 0)
+			end if
+			break
+		end switch
+		break
+	end switch
+end sub
+
+
+sub ObjectDraw
+	switch Object.PropertyValue
+	case RING_SPARKLE
+		DrawSprite(Object.Frame)
+		break
+	case LIGHTNING_SHIELD_SPARK
+		DrawSpriteFX(Object.Frame, FX_FLIP, Object.XPos, Object.YPos)
+		break
+	case INSTA_SHIELD_SPIN
+		DrawSpriteXY(Object.Frame, Player.XPos, Player.YPos)
+		break
+	end switch
+end sub
+
+
+sub ObjectStartup
+	LoadSpriteSheet("Global/Items4.gif")
+	SpriteFrame(-8, -8, 16, 16,  1, 385)
+	SpriteFrame(-8, -8, 16, 16, 18, 385)
+	SpriteFrame(-8, -8, 16, 16, 35, 385)
+	SpriteFrame(-8, -8, 16, 16, 52, 385)
+	//Lighting Shield Spark
+	SpriteFrame( 0,  0,  1,  1,   1,   1)
+	SpriteFrame(-3, -3,  6,  6, 197, 254)
+	SpriteFrame(-8, -8, 16, 16, 229, 282)
+	//Insta-Shield
+	SpriteFrame(  0,   0,  1,  1,  1,   1)
+	SpriteFrame(-12, -19, 19, 19, 197, 261)
+	SpriteFrame(  0, -16, 18, 21, 228, 299)
+	SpriteFrame( -3,   2, 27, 24, 218, 257)
+	SpriteFrame(-24, -16, 31, 38, 197, 282)
+	SpriteFrame(-16, -24, 40, 40, 214, 321)
+	SpriteFrame(-24, -16, 41, 40, 214, 362)
+end sub
+
+sub RSDK
+	LoadSpriteSheet("Global/Display.gif")
+	SetEditorIcon(Icon0,SingleIcon,-16,-16,32,32,1,143)
+end sub

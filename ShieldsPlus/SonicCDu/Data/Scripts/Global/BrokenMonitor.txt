@@ -1,0 +1,562 @@
+//---------------Sonic CD Broken Monitor Script---------------//
+//--------Scripted by Christian Whitehead 'The Taxman'--------//
+//-------Unpacked By Rubberduckycooly's Script Unpacker-------//
+
+// Aliases
+#alias Object.Value0	:	Object.PowerupPos
+#alias Object.Value1	:	Object.Timer
+#alias Object.Value4	:	Shield.Select
+#alias Object.Value6	:	Shield.SelectOffset
+
+// Player Aliases
+#alias Player.Value0	:	Player.Rings
+#alias Player.Value3	:	Player.SpeedShoesTimer
+#alias Player.Value4	:	Player.InvincibleTimer
+#alias Player.Value5	:	Player.BlinkTimer
+
+// States
+#alias 0	:	BROKENMONITOR_SPAWN_POWERUP
+#alias 1	:	BROKENMONITOR_FADE_POWERUP
+#alias 2	:	BROKENMONITOR_BLANK
+
+// Player
+#alias 0	:	PLAYER_SONIC
+
+// Soundtrack
+#alias 0	:	OST_JP
+
+// Priority
+#alias 0	:	PRIORITY_BOUNDS
+#alias 1	:	PRIORITY_ACTIVE
+
+// Ink Effects
+#alias 2	:	INK_ALPHA
+
+// Panning
+#alias 0	:	PAN_RIGHT
+#alias 1	:	PAN_LEFT
+
+// Global SFX
+#alias 10	:	SFX_G_BLUESHIELD
+#alias 20	:	SFX_G_1UP
+#alias 21	:	SFX_G_ACHIEVEMENT
+#alias 35	:	SFX_G_FIRESHIELD
+#alias 37	:	SFX_G_BUBBLESHIELD
+#alias 39	:	SFX_G_LIGHTNINGSHIELD
+
+// Property Values
+#alias 0	:	MONITOR_BLANK
+#alias 1	:	MONITOR_RINGS
+#alias 2	:	MONITOR_SHIELD
+#alias 3	:	MONITOR_INVINCIBILITY
+#alias 4	:	MONITOR_POWER_SNEAKERS
+#alias 5	:	MONITOR_SONIC1UP
+#alias 6	:	MONITOR_TIME
+#alias 7	:	MONITOR_TAILS1UP
+#alias 8	:	MONITOR_SUPER
+#alias 16	:	MONITOR_GENERIC1UP
+
+// Origins Exclusive
+#alias 9	:	MONITOR_KNUCKLES1UP
+#alias 10	:	MONITOR_AMY1UP
+
+#alias 11	:	MONITOR_FIRE
+#alias 12	:	MONITOR_BUBBLE
+#alias 13	:	MONITOR_LIGHTNING
+
+#alias 17	:	MONITOR_BLAST_BLUE_SHIELD
+#alias 18	:	MONITOR_BLAST_RED_SHIELD
+#alias 19	:	MONITOR_BLAST_GOLD_SHIELD
+// Game Mode Aliases
+#alias 2	:	MODE_TIMEATTACK
+
+// Blue Shield possesion Property Value
+#alias 1	:	ACTIVE_SHIELD
+
+// Shield type
+#alias 1	:	BLUE_SHIELD
+#alias 2	:	FIRE_SHIELD
+#alias 3	:	BUBBLE_SHIELD
+#alias 4	:	LIGHTNING_SHIELD
+#alias 5	:	GOLD_SHIELD
+
+#alias 6	:	BLAST_BLUE_SHIELD
+#alias 7	:	BLAST_RED_SHIELD
+
+
+sub ObjectMain
+	switch Object.State
+	case BROKENMONITOR_SPAWN_POWERUP
+		if Object.Timer < 0
+			Object.PowerupPos += Object.Timer
+			Object.Timer	  += 0x1800
+		else
+			Object.Timer = 0
+		end if
+		
+		if Object.Timer == 0
+			Object.State	 = BROKENMONITOR_FADE_POWERUP
+			Object.InkEffect = INK_ALPHA
+			switch Object.PropertyValue
+			case MONITOR_RINGS
+				Player.Rings += 10
+				if Ring.Pan == PAN_RIGHT
+					SetSfxAttributes(1, -1, -100)
+					Ring.Pan = PAN_LEFT
+				else
+					SetSfxAttributes(2, -1, 100)
+					Ring.Pan = PAN_RIGHT
+				end if
+				
+				if Player.Rings > 999
+					Player.Rings = 999
+				end if
+				
+				if Player.Rings >= Ring.ExtraLife
+					if Options.GameMode != MODE_TIMEATTACK
+
+#platform: Use_Origins
+						if game.coinMode == false
+							Player.Lives++
+						else
+							game.callbackParam0 = 1	// Set the amount of coins to add
+							EngineCallback(NOTIFY_ADD_COIN)
+						end if
+#endplatform
+
+#platform: Use_Standalone
+						Player.Lives++
+#endplatform
+
+						if Stage.PlayerListPos == PLAYER_SONIC
+							PlaySfx(SFX_G_1UP, false)
+						else
+							PlaySfx(SFX_G_ACHIEVEMENT, false)
+						end if
+						
+					end if
+					
+					Ring.ExtraLife += 100
+					if Ring.ExtraLife > 300
+						Ring.ExtraLife = 1000
+					end if
+					
+					// King of the Rings Unlock Criteria
+					if Player.Rings >= 200
+						if Stage.PlayerListPos == PLAYER_SONIC
+							if Stage.DebugMode == false
+								SetAchievement(4, 100)
+							end if
+						end if
+					end if
+				end if
+				break
+			case 2
+				Object[2].PropertyValue = ACTIVE_SHIELD
+				if Player.GravityStrength == 4096
+					switch Shield.Select
+					case 0
+					case 2
+						Player.Shield = BLUE_SHIELD
+						PlaySfx(SFX_G_BLUESHIELD, false)
+						break
+					case 1
+					case 3
+						Player.Shield = BUBBLE_SHIELD
+						PlaySfx(SFX_G_BUBBLESHIELD, false)
+						break
+					case 4
+					case 7
+						Player.Shield = GOLD_SHIELD
+						PlaySfx(SFX_G_BUBBLESHIELD, false)
+						break
+					case 5
+						Player.Shield = BLAST_BLUE_SHIELD
+						PlaySfx(SFX_G_BLUESHIELD, false)
+						break
+					case 6
+						Player.Shield = BLAST_RED_SHIELD
+						PlaySfx(SFX_G_FIRESHIELD, false)
+						break
+					end switch
+				else
+					switch Shield.Select
+					case 0
+						Player.Shield = BLUE_SHIELD
+						PlaySfx(SFX_G_BLUESHIELD, false)
+						break
+					case 1
+						Player.Shield = FIRE_SHIELD
+						PlaySfx(SFX_G_FIRESHIELD, false)
+						break
+					case 2
+						Player.Shield = BUBBLE_SHIELD
+						PlaySfx(SFX_G_BUBBLESHIELD, false)
+						break
+					case 3
+						Player.Shield = LIGHTNING_SHIELD
+						PlaySfx(SFX_G_LIGHTNINGSHIELD, false)
+						break
+					case 4
+					case 7
+						Player.Shield = GOLD_SHIELD
+						PlaySfx(SFX_G_BUBBLESHIELD, false)
+						break
+					case 5
+						Player.Shield = BLAST_BLUE_SHIELD
+						PlaySfx(SFX_G_BLUESHIELD, false)
+						break
+					case 6
+						Player.Shield = BLAST_RED_SHIELD
+						PlaySfx(SFX_G_FIRESHIELD, false)
+						break
+					end switch
+				end if
+				
+				if Object[2].Type != TypeName[Invincibility]
+					Object[2].Type		= TypeName[Blue Shield]
+					Object[2].State		= 0
+					Object[2].Value5	= true
+					Object[2].Priority	= PRIORITY_ACTIVE
+					Object[2].DrawOrder = 4
+					Object[2].InkEffect = INK_ALPHA
+					Object[2].Alpha		= 160
+					Object[2].XPos		= Player.XPos
+					Object[2].YPos		= Player.YPos
+				end if
+				break
+			case MONITOR_INVINCIBILITY
+				Object[2].State = 0
+
+				Object[2].Type		= TypeName[Invincibility]
+				Object[2].Priority	= PRIORITY_ACTIVE
+				Object[2].DrawOrder = 4
+				Object[2].XPos		= Player.XPos
+				Object[2].YPos		= Player.YPos
+
+				if Options.Soundtrack == OST_JP
+					Player.InvincibleTimer = 0x4EC
+				else
+					Player.InvincibleTimer = 0x528
+				end if
+
+				Player.BlinkTimer = 0
+				Player.Visible	  = true
+				PlayMusic(2)
+				break
+			case MONITOR_POWER_SNEAKERS
+				PlayMusic(3)
+				Player.Acceleration		= 0x1800
+				Player.AirAcceleration	= 0x3000
+				Player.TopSpeed			= 0xC0000
+				Player.SpeedShoesTimer	= 0x528
+				break
+			case MONITOR_SONIC1UP
+
+#platform: Use_Origins
+				if game.coinMode == false
+					Player.Lives++
+				else
+					game.callbackParam0 = 1	// Set the amount of coins to add
+					EngineCallback(NOTIFY_ADD_COIN)
+				end if
+#endplatform
+
+#platform: Use_Standalone
+				Player.Lives++
+#endplatform
+
+				PlaySfx(SFX_G_1UP, false)
+				break
+			case MONITOR_TIME
+				break
+			case MONITOR_TAILS1UP
+			case MONITOR_KNUCKLES1UP
+			case MONITOR_AMY1UP
+			case MONITOR_GENERIC1UP
+				Player.Lives++
+				PlaySfx(SFX_G_ACHIEVEMENT, false)
+				break
+
+			case MONITOR_SUPER
+				Object[2].State		= 0
+				Object[2].Type		= TypeName[Invincibility]
+				Object[2].Priority	= PRIORITY_ACTIVE
+				Object[2].DrawOrder = 4
+				Object[2].XPos		= Player.XPos
+				Object[2].YPos		= Player.YPos
+
+				Player.InvincibleTimer	= 0x528
+				Player.BlinkTimer		= 0
+				Player.Visible			= true
+				Player.Acceleration		= 0x1800
+				Player.AirAcceleration	= 0x3000
+				Player.TopSpeed			= 0xC0000
+				Player.SpeedShoesTimer	= 0x528
+				break
+			case MONITOR_FIRE
+				Object[2].PropertyValue = ACTIVE_SHIELD
+				Player.Shield = FIRE_SHIELD
+				PlaySfx(SFX_G_FIRESHIELD, false)
+				if Object[2].Type != TypeName[Invincibility]
+					Object[2].Type		= TypeName[Blue Shield]
+					Object[2].State		= 0
+					Object[2].Value5	= true
+					Object[2].Priority	= PRIORITY_ACTIVE
+					Object[2].DrawOrder = 4
+					Object[2].InkEffect = INK_ALPHA
+					Object[2].Alpha		= 160
+					Object[2].XPos		= Player.XPos
+					Object[2].YPos		= Player.YPos
+				end if
+				break
+			case MONITOR_BUBBLE
+				Object[2].PropertyValue = ACTIVE_SHIELD
+				Player.Shield = BUBBLE_SHIELD
+				PlaySfx(SFX_G_BUBBLESHIELD, false)
+				if Object[2].Type != TypeName[Invincibility]
+					Object[2].Type		= TypeName[Blue Shield]
+					Object[2].State		= 0
+					Object[2].Value5	= true
+					Object[2].Priority	= PRIORITY_ACTIVE
+					Object[2].DrawOrder = 4
+					Object[2].InkEffect = INK_ALPHA
+					Object[2].Alpha		= 160
+					Object[2].XPos		= Player.XPos
+					Object[2].YPos		= Player.YPos
+				end if
+				break
+			case MONITOR_LIGHTNING
+				Object[2].PropertyValue = ACTIVE_SHIELD
+				Player.Shield = LIGHTNING_SHIELD
+				PlaySfx(SFX_G_LIGHTNINGSHIELD, false)
+				if Object[2].Type != TypeName[Invincibility]
+					Object[2].Type		= TypeName[Blue Shield]
+					Object[2].State		= 0
+					Object[2].Value5	= true
+					Object[2].Priority	= PRIORITY_ACTIVE
+					Object[2].DrawOrder = 4
+					Object[2].InkEffect = INK_ALPHA
+					Object[2].Alpha		= 160
+					Object[2].XPos		= Player.XPos
+					Object[2].YPos		= Player.YPos
+				end if
+				break
+			case MONITOR_BLAST_BLUE_SHIELD
+				Object[2].PropertyValue = ACTIVE_SHIELD
+				Player.Shield = BLAST_BLUE_SHIELD
+				PlaySfx(SFX_G_BLUESHIELD, false)
+				if Object[2].Type != TypeName[Invincibility]
+					Object[2].Type		= TypeName[Blue Shield]
+					Object[2].State		= 0
+					Object[2].Value5	= true
+					Object[2].Priority	= PRIORITY_ACTIVE
+					Object[2].DrawOrder = 4
+					Object[2].InkEffect = INK_ALPHA
+					Object[2].Alpha		= 160
+					Object[2].XPos		= Player.XPos
+					Object[2].YPos		= Player.YPos
+				end if
+				break
+			case MONITOR_BLAST_RED_SHIELD
+				Object[2].PropertyValue = ACTIVE_SHIELD
+				Player.Shield = BLAST_RED_SHIELD
+				PlaySfx(SFX_G_FIRESHIELD, false)
+				if Object[2].Type != TypeName[Invincibility]
+					Object[2].Type		= TypeName[Blue Shield]
+					Object[2].State		= 0
+					Object[2].Value5	= true
+					Object[2].Priority	= PRIORITY_ACTIVE
+					Object[2].DrawOrder = 4
+					Object[2].InkEffect = INK_ALPHA
+					Object[2].Alpha		= 160
+					Object[2].XPos		= Player.XPos
+					Object[2].YPos		= Player.YPos
+				end if
+				break
+			case MONITOR_BLAST_GOLD_SHIELD
+				Object[2].PropertyValue = ACTIVE_SHIELD
+				Player.Shield = GOLD_SHIELD
+				PlaySfx(SFX_G_BUBBLESHIELD, false)
+				if Object[2].Type != TypeName[Invincibility]
+					Object[2].Type		= TypeName[Blue Shield]
+					Object[2].State		= 0
+					Object[2].Value5	= true
+					Object[2].Priority	= PRIORITY_ACTIVE
+					Object[2].DrawOrder = 4
+					Object[2].InkEffect = INK_ALPHA
+					Object[2].Alpha		= 160
+					Object[2].XPos		= Player.XPos
+					Object[2].YPos		= Player.YPos
+				end if
+				break
+			end switch
+		end if
+		break
+		
+	case BROKENMONITOR_FADE_POWERUP
+		Object.Timer++
+		if Object.Timer == 30
+			Object.Timer = 0
+			Object.State = BROKENMONITOR_BLANK
+			
+			Object.PropertyValue = MONITOR_BLANK
+			Object.Priority		 = PRIORITY_BOUNDS
+		else
+			if Object.Timer > 14
+				Object.Alpha -= 16
+			end if
+		end if
+		break
+		
+	case BROKENMONITOR_BLANK
+		break
+		
+	end switch
+end sub
+
+
+sub ObjectDraw
+	DrawSprite(0)
+	if Object.PropertyValue == MONITOR_SHIELD
+		if Player.GravityStrength == 4096
+			switch Shield.Select
+			case 0
+			case 2
+				DrawSpriteFX(2, FX_INK, Object.XPos, Object.PowerupPos)
+				break
+			case 1
+			case 3
+				DrawSpriteFX(12, FX_INK, Object.XPos, Object.PowerupPos)
+				break
+			case 5
+				DrawSpriteFX(17, FX_INK, Object.XPos, Object.PowerUpPos)
+				break
+			case 6
+				DrawSpriteFX(18, FX_INK, Object.XPos, Object.PowerUpPos)
+				break
+			case 4
+			case 7
+				DrawSpriteFX(19, FX_INK, Object.XPos, Object.PowerupPos)
+				break
+			end switch
+		else
+			switch Shield.Select
+			case 0
+				DrawSpriteFX(2, FX_INK, Object.XPos, Object.PowerupPos)
+				break
+			case 1
+				DrawSpriteFX(11, FX_INK, Object.XPos, Object.PowerupPos)
+				break
+			case 2
+				DrawSpriteFX(12, FX_INK, Object.XPos, Object.PowerupPos)
+				break
+			case 3
+				DrawSpriteFX(13, FX_INK, Object.XPos, Object.PowerupPos)
+				break
+			case 5
+				DrawSpriteFX(17, FX_INK, Object.XPos, Object.PowerUpPos)
+				break
+			case 6
+				DrawSpriteFX(18, FX_INK, Object.XPos, Object.PowerUpPos)
+				break
+			case 4
+			case 7
+				DrawSpriteFX(19, FX_INK, Object.XPos, Object.PowerUpPos)
+				break
+			end switch
+		end if
+	else
+		if Object.PropertyValue > 0
+			DrawSpriteFX(Object.PropertyValue, FX_INK, Object.XPos, Object.PowerupPos)
+		end if
+	end if
+end sub
+
+
+sub ObjectStartup
+	LoadSpriteSheet("Global/Items.gif")
+	
+	// 0 - Broken Monitor Frame
+	SpriteFrame(-16, 0, 32, 16, 18, 185)
+	
+	// 1-8 - Icons
+	SpriteFrame(-8, -8, 16, 14, 18, 1)			// #1 - Ring
+	switch Game.BlueShieldDesign
+	case 0
+		SpriteFrame(-8, -8, 16, 14, 18, 16)		// #2 - Blue Shield
+		break
+	case 1
+		SpriteFrame(-8, -8, 16, 14, 53, 48)		// #2 - S2 Blue Shield
+		break
+	case 2
+		SpriteFrame(-8, -8, 16, 14, 35, 31)		// #2 - 3D Blast Blue Shield
+		break
+	case 3
+		SpriteFrame(-8, -8, 16, 14, 53, 33)		// #2 - Chaotix Blue Shield
+		break
+	end switch
+	SpriteFrame(-8, -8, 16, 14, 18, 31)			// #3 - Invincibility
+	SpriteFrame(-8, -8, 16, 14, 18, 46)			// #4 - Power Sneakers
+
+#platform: Use_Origins
+	if game.coinMode == false
+		SpriteFrame(-8, -8, 16, 14, 18, 61)		// #5 - Sonic
+	else
+		SpriteFrame(-8, -8, 16, 14, 35, 151)	// #5 - Coins
+	end if
+#endplatform
+
+#platform: Use_Standalone
+	SpriteFrame(-8, -8, 16, 14, 18, 61)			// #5 - Sonic
+#endplatform
+
+	SpriteFrame(-8, -8, 16, 14, 18, 76)			// #6 - Time
+	
+#platform: Use_Origins
+	if game.coinMode == false
+		SpriteFrame(-8, -8, 16, 14, 18, 91)		// #7 - Tails
+	else
+		SpriteFrame(-8, -8, 16, 14, 35, 151)	// #7 - Coins
+	end if
+#endplatform
+
+#platform: Use_Standalone
+	SpriteFrame(-8, -8, 16, 14, 18, 91)			// #7 - Tails
+#endplatform
+	
+	SpriteFrame(-8, -8, 16, 14, 18, 106)		// #8 - S
+	
+#platform: Use_Origins
+	if game.coinMode == false
+		SpriteFrame(-8, -8, 16, 14, 18, 166)	// #9 - Knuckles
+	else
+		SpriteFrame(-8, -8, 16, 14, 35, 151)	// #9 - Coins
+	end if
+	if game.coinMode == false
+		SpriteFrame(-8, -8, 16, 14, 35, 166)	// #10 - Amy
+	else
+		SpriteFrame(-8, -8, 16, 14, 35, 151)	// #10 - Coins
+	end if
+#endplatform
+
+#platform: Use_Standalone
+	SpriteFrame(-8, -8, 16, 14, 18, 91)			// #9 - Tails
+	SpriteFrame(-8, -8, 16, 14, 18, 91)			// #10 - Tails
+#endplatform
+
+	SpriteFrame(-8, -9, 16, 14, 18, 121)	// #11 - Flame
+	SpriteFrame(-8, -9, 16, 14, 18, 136)	// #12 - Bubble
+	SpriteFrame(-8, -9, 16, 14, 18, 151)	// #13 - Thunder
+	SpriteFrame( -8,  -9, 16, 14, 35,  1)	// #14 - Static1
+	SpriteFrame( -8,  -9, 16, 14, 35, 16)	// #15 - Static2
+	SpriteFrame(-8, -8, 16, 14, 35, 31)		// #16 - Default 1UP
+	SpriteFrame(-8, -8, 16, 14, 35, 31)		// #17 - 3D Blast Blue Shield
+	SpriteFrame(-8, -9, 16, 14, 35, 61)		// #18 - Red Shield
+	SpriteFrame(-8, -9, 16, 14, 35, 46)		// #19 - Gold Shield
+end sub
+
+sub RSDK
+	LoadSpriteSheet("Global/Display.gif")
+	SetEditorIcon(Icon0,SingleIcon,-16,-16,32,32,1,143)
+end sub

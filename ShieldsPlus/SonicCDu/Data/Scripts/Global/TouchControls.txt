@@ -1,0 +1,525 @@
+//------------Sonic CD DebugMode Script-------------//
+//--------Scripted by Christian Whitehead 'The Taxman'--------//
+//-------Unpacked By Rubberduckycooly's Script Unpacker-------//
+
+//-------Aliases-------//
+#alias Object.Value0	:	Object.Fade
+#alias Object.Value1	:	Object.PauseFade
+#alias Object.Value2	:	Object.PauseXPos
+#alias Object.Value3	:	Object.AButtonXPos
+#alias Object.Value4	:	Object.DPadXPos
+#alias Object.Value6	:	Object.HelperSprite
+#alias Object.Value7	:	Object.HelperPriority
+#alias Object.Rotation	:	Object.CurrentSelection
+
+#alias Object.Value4	:	Monitor.ShieldType
+#alias Object.Value5	:	Monitor.IsGoldShield
+
+// Ink Effects
+#alias 2	:	INK_ALPHA
+
+#alias 2	:	SCREEN_SHIELD
+#alias 4	:	TYPE_G_SHIELD
+
+// Player
+#alias 1	:	PLAYER_TAILS
+
+// Control Mode
+#alias 0	:	CONTROLMODE_NORMAL
+
+// Priority
+#alias 1	:	PRIORITY_ACTIVE
+#alias 4	:	PRIORITY_BOUNDS_DESTROY
+
+#alias 2	:	FIRE_SHIELD
+#alias 3	:	BUBBLE_SHIELD
+#alias 4	:	LIGHTNING_SHIELD
+#alias 5	:	GOLD_SHIELD
+
+#alias 6	:	BLAST_BLUE_SHIELD
+#alias 7	:	BLAST_RED_SHIELD
+
+// Function declarations
+#function DebugMode_ChangeItem
+
+function DebugMode_ChangeItem
+	switch Object.CurrentSelection
+	case 1
+	case 2
+	case 3
+	case 4
+	case 5
+	case 6
+	case 7
+	case 8
+		Object.Frame		= Object.CurrentSelection
+		Object.HelperSprite = 30
+		break
+	case 0
+	case 9
+	case 10
+	case 11
+	case 12
+	case 13
+	case 14
+	case 15
+	case 16
+	case 17
+	case 18
+	case 19
+	case 20
+	case 21
+	case 22
+	case 23
+	case 24
+	case 25
+		Object.Frame		= Object.CurrentSelection
+		Object.HelperSprite = 0
+		break
+
+	case 26
+		Object.Frame		= 26
+		Object.HelperSprite = 27
+		break
+
+	case 27
+		Object.Frame		= 28
+		Object.HelperSprite = 29
+		break
+	case 28
+		Object.Frame		= 31
+		Object.HelperSprite = 30
+		break
+	case 29
+		Object.Frame		= 32
+		Object.HelperSprite = 30
+		break
+	case 30
+		Object.Frame		= 33
+		Object.HelperSprite = 30
+		break
+	case 31
+		Object.Frame		= 34
+		Object.HelperSprite = 30
+		break
+	case 32
+		Object.Frame		= 35
+		Object.HelperSprite = 30
+		break
+	case 33
+		Object.Frame		= 36
+		Object.HelperSprite = 30
+		break
+	end switch
+endfunction
+
+
+sub ObjectMain
+// a bit messy, isn't it? blame mobile version for not having debug mode :)
+#platform: Standard
+	TempValue0 = false
+	if KeyDown[1].Left == true
+		Player.XPos -= Player.YVelocity
+		TempValue0 = true
+	end if
+
+	if KeyDown[1].Right == true
+		Player.XPos += Player.YVelocity
+		TempValue0 = true
+	end if
+
+	if KeyDown[1].Up == true
+		Player.YPos -= Player.YVelocity
+		TempValue0 = true
+	end if
+
+	if KeyDown[1].Down == true
+		Player.YPos += Player.YVelocity
+		TempValue0 = true
+	end if
+
+	if TempValue0 == true
+		Player.YVelocity += 0xC00
+		if Player.YVelocity > 0x100000
+			Player.YVelocity = 0x100000
+		end if
+	else
+		Player.YVelocity = 0
+	end if
+#endplatform
+
+	if KeyPress[1].ButtonB == true
+	
+#platform: Standard
+		Object.HelperSprite = 0
+		Object.Type = TypeName[Player Object]
+		// THEY #FIXED HIM!!!
+		if Stage.PlayerListPos == PLAYER_TAILS
+			Object[+1].Type = TypeName[Tails Object]
+		end if
+		Player.Speed	 = 0
+		Player.Rotation  = 0
+		Player.XVelocity = 0
+		Player.YVelocity = 0
+#endplatform
+
+#platform: Use_Origins
+		Player.State = Player_State_Air_NoDropDash
+#endplatform
+
+#platform: Use_Standalone
+	#platform: Standard
+		Player.State = Player_State_Air
+	#endplatform
+#endplatform
+
+#platform: Standard
+		Player.Animation	  = ANI_WALKING
+		Player.AnimationSpeed = 0
+		Player.Frame		  = 0
+
+		Player.ControlMode		 = CONTROLMODE_NORMAL
+		Player.ObjectInteraction = true
+#endplatform
+	else
+		if KeyPress[0].ButtonA == true
+#platform: Standard
+			Object.CurrentSelection++
+#endplatform
+			
+#platform: Use_Origins
+			// These two checks were introduced in Origins 1.0.4, to prevent the player from spawning Coin Monitors in Debug Mode
+			
+			if Object.CurrentSelection == 5
+				Object.CurrentSelection++
+			end if
+			
+			if Object.CurrentSelection == 7
+				Object.CurrentSelection++
+			end if
+#endplatform
+#platform: Standard
+
+			if Object.CurrentSelection > 33
+				Object.CurrentSelection = 0
+			end if
+			CallFunction(DebugMode_ChangeItem)
+#endplatform
+		end if
+
+		if KeyDown[0].ButtonA == true
+			if KeyPress[0].ButtonC == true
+#platform: Standard
+				Object.CurrentSelection--
+#endplatform
+				
+#platform: Use_Origins
+				// Similarly to above, this part's also new to Origins 1.0.4 and prevents coin inflation
+				
+				if Object.CurrentSelection == 5
+					Object.CurrentSelection--
+				end if
+				
+				if Object.CurrentSelection == 7
+					Object.CurrentSelection--
+				end if
+#endplatform
+#platform: Standard
+				if Object.CurrentSelection < 0
+					Object.CurrentSelection = 33
+				end if
+				CallFunction(DebugMode_ChangeItem)
+#endplatform
+			end if
+		else
+#platform: Standard
+			if KeyPress[0].ButtonC == true
+				switch Object.CurrentSelection
+				case 0
+					CreateTempObject(TypeName[Ring], 0, Player.XPos, Player.YPos)
+					Object[TempObjectPos].DrawOrder = 4
+					break
+
+				case 1
+				case 2
+				case 3
+				case 4
+				case 5
+				case 6
+				case 7
+				case 8
+					CreateTempObject(TypeName[Monitor], Object.CurrentSelection, Player.XPos, Player.YPos)
+					break
+				case 28
+					CreateTempObject(TypeName[Monitor], 19, Player.XPos, Player.YPos)
+					Monitor[TempObjectPos].ShieldType = GOLD_SHIELD
+					Monitor[TempObjectPos].IsGoldShield = true
+					break
+				case 29
+					CreateTempObject(TypeName[Monitor], 17, Player.XPos, Player.YPos)
+					Monitor[TempObjectPos].ShieldType = BLAST_BLUE_SHIELD
+					Monitor[TempObjectPos].IsGoldShield = true
+					break
+				case 30
+					CreateTempObject(TypeName[Monitor], 18, Player.XPos, Player.YPos)
+					Monitor[TempObjectPos].ShieldType = BLAST_RED_SHIELD
+					Monitor[TempObjectPos].IsGoldShield = true
+					break
+				case 31
+					CreateTempObject(TypeName[Monitor], 11, Player.XPos, Player.YPos)
+					Monitor[TempObjectPos].ShieldType = FIRE_SHIELD
+					Monitor[TempObjectPos].IsGoldShield = true
+					break
+				case 32
+					CreateTempObject(TypeName[Monitor], 12, Player.XPos, Player.YPos)
+					Monitor[TempObjectPos].ShieldType = BUBBLE_SHIELD
+					Monitor[TempObjectPos].IsGoldShield = true
+					break
+				case 33
+					CreateTempObject(TypeName[Monitor], 13, Player.XPos, Player.YPos)
+					Monitor[TempObjectPos].ShieldType = LIGHTNING_SHIELD
+					Monitor[TempObjectPos].IsGoldShield = true
+					break
+
+				case 9
+				case 10
+				case 11
+				case 12
+				case 13
+				case 14
+				case 15
+				case 16
+					TempValue0  = Object.CurrentSelection
+					TempValue0 -= 9
+					CreateTempObject(TypeName[Red Spring], TempValue0, Player.XPos, Player.YPos)
+					break
+
+				case 17
+				case 18
+				case 19
+				case 20
+				case 21
+				case 22
+				case 23
+				case 24
+					TempValue0  = Object.CurrentSelection
+					TempValue0 -= 17
+					CreateTempObject(TypeName[Yellow Spring], TempValue0, Player.XPos, Player.YPos)
+					break
+					
+				case 25
+					CreateTempObject(TypeName[Lamp Post], 0, Player.XPos, Player.YPos)
+					break
+
+				case 26
+					CreateTempObject(TypeName[Future Post], 0, Player.XPos, Player.YPos)
+					break
+
+				case 27
+					CreateTempObject(TypeName[Past Post], 0, Player.XPos, Player.YPos)
+					break
+				end switch
+
+				Object[TempObjectPos].Priority = PRIORITY_BOUNDS_DESTROY
+			end if
+#endplatform
+		end if
+	end if
+end sub
+
+
+sub ObjectDraw
+#platform: Standard
+	if Object.HelperSprite > 0
+		DrawSpriteXY(Object.HelperSprite, Player.XPos, Player.YPos)
+	end if
+	DrawSpriteXY(Object.Frame, Player.XPos, Player.YPos)
+#endplatform
+
+#platform: Mobile
+	if Options.TouchControls==0
+		TempValue0=-1
+	else
+		TempValue0=Player.ControlMode
+	end if
+	if TempValue0==0
+		if Stage.State!=STAGE_PAUSED
+			if Object.Value0<160
+				Object.Value0+=4
+				Object.Value1=Object.Value0
+				Object.Value1<<=1
+			end if
+			Object.Alpha=Object.Value0
+			DrawSpriteScreenFX(0,FX_INK,Object.Value4,160)
+			if Player.Left==1
+				Object.Alpha=160
+				DrawSpriteScreenFX(7,FX_INK,Object.Value4,160)
+			else
+				Object.Alpha=Object.Value0
+				DrawSpriteScreenFX(3,FX_INK,Object.Value4,160)
+			end if
+			if Player.Down==1
+				Object.Alpha=160
+				DrawSpriteScreenFX(6,FX_INK,Object.Value4,160)
+			else
+				Object.Alpha=Object.Value0
+				DrawSpriteScreenFX(2,FX_INK,Object.Value4,160)
+			end if
+			if Player.Right==1
+				Object.Alpha=160
+				DrawSpriteScreenFX(8,FX_INK,Object.Value4,160)
+			else
+				Object.Alpha=Object.Value0
+				DrawSpriteScreenFX(4,FX_INK,Object.Value4,160)
+			end if
+			if Player.Up==1
+				Object.Alpha=160
+				DrawSpriteScreenFX(5,FX_INK,Object.Value4,160)
+			else
+				Object.Alpha=Object.Value0
+				DrawSpriteScreenFX(1,FX_INK,Object.Value4,160)
+			end if
+			if Player.JumpHold==1
+				Object.Alpha=160
+				DrawSpriteScreenFX(10,FX_INK,Object.Value3,176)
+			else
+				Object.Alpha=Object.Value0
+				DrawSpriteScreenFX(9,FX_INK,Object.Value3,176)
+			end if
+		else
+			Object.Value0=0
+		end if
+		if Object.Value1<256
+			Object.Alpha=Object.Value1
+			DrawSpriteScreenFX(11,FX_INK,Object.Value2,8)
+		else
+			DrawSpriteScreenXY(11,Object.Value2,8)
+		end if
+	else
+		if Object.Value0>0
+			Object.Value0-=4
+			Object.Value1-=8
+		end if
+		Object.Alpha=Object.Value0
+		if Object.Alpha>0
+			DrawSpriteScreenFX(0,FX_INK,Object.Value4,160)
+			DrawSpriteScreenFX(1,FX_INK,Object.Value4,160)
+			DrawSpriteScreenFX(4,FX_INK,Object.Value4,160)
+			DrawSpriteScreenFX(2,FX_INK,Object.Value4,160)
+			DrawSpriteScreenFX(3,FX_INK,Object.Value4,160)
+			DrawSpriteScreenFX(9,FX_INK,Object.Value3,176)
+		end if
+		if Object.Value1<0
+			Object.Alpha=0
+		else
+			Object.Alpha=Object.Value1
+		end if
+		if Object.Value1<256
+			Object.Alpha=Object.Value1
+			DrawSpriteScreenFX(11,FX_INK,Object.Value2,8)
+		else
+			DrawSpriteScreenXY(11,Object.Value2,8)
+		end if
+	end if
+#endplatform
+end sub
+
+
+sub ObjectStartup
+#platform: Standard
+	LoadSpriteSheet("Global/Items.gif")
+	SpriteFrame(-8, -8, 16, 16,  1,   1)
+	SpriteFrame(-8, -9, 16, 14, 18,   1)//Rings
+	SpriteFrame(-8, -9, 16, 14, 18,  16)//Blue Shield
+	SpriteFrame(-8, -9, 16, 14, 18,  31)//Invincibility
+	SpriteFrame(-8, -9, 16, 14, 18,  46)//Speed Shoes
+	SpriteFrame(-8, -9, 16, 14, 18,  61)//Sonic 1up
+	SpriteFrame(-8, -9, 16, 14, 18,  76)//Time
+	SpriteFrame(-8, -9, 16, 14, 18,  91)//Tails 1up
+	SpriteFrame(-8, -9, 16, 14, 18, 106)// Super
+
+	// Springs
+	SpriteFrame(-16, -8, 32, 16, 84, 1)			// #9  - Red Spring facing up
+	SpriteFrame(-8, -16, 16, 32, 117, 1)		// #10 - Red Spring facing right
+	SpriteFrame(-8, -16, 16, 32, 175, 1)		// #11 - Red Spring facing left
+	SpriteFrame(-16, -8, 32, 16, 84, 59)		// #12 - Red Spring facing down
+	SpriteFrame(-16, -16, 32, 32, 84, 117)		// #13 - Red Spring facing diagonal right
+	SpriteFrame(-16, -16, 32, 32, 117, 165)		// #14 - Red Spring facing diagonal left
+	SpriteFrame(-16, -16, 32, 32, 84, 117)		// #15 - Red Spring facing diagonal right 2
+	SpriteFrame(-16, -16, 32, 32, 117, 165)		// #16 - Red Spring facing diagonal left 2
+
+	// Springs
+	SpriteFrame(-16, -8, 32, 16, 84, 183)		// #17 - Yellow Spring facing up
+	SpriteFrame(-8, -16, 16, 32, 215, 116)		// #18 - Yellow Spring facing right
+	SpriteFrame(-8, -16, 16, 32, 232, 116)		// #19 - Yellow Spring facing left
+	SpriteFrame(-16, -8, 32, 16, 184, 239)		// #20 - Yellow Spring facing down
+	SpriteFrame(-16, -16, 32, 32, 183, 165)		// #21 - Yellow Spring facing diagonal right
+	SpriteFrame(-16, -16, 32, 32, 216, 182)		// #22 - Yellow Spring facing diagonal left
+	SpriteFrame(-16, -16, 32, 32, 183, 165)		// #23 - Yellow Spring facing diagonal right 2
+	SpriteFrame(-16, -16, 32, 32, 216, 182)		// #24 - Yellow Spring facing diagonal left 2
+
+	SpriteFrame(-8, -40, 16, 64, 1, 137)		// #25 - Lamp Post
+	SpriteFrame(-8, -24, 16, 48, 35, 204)		// #26 - Time Post Body
+	SpriteFrame(-16, -40, 32, 16, 52, 239)		// #27 - Future Post
+	SpriteFrame(-8, -24, 16, 48, 35, 204)		// #28 - Time Post Body
+	SpriteFrame(-16, -40, 32, 16, 118, 239)		// #29 - Past Post
+
+	SpriteFrame(-16, -16, 32, 32, 52,  1)		// #30 - Monitor
+	SpriteFrame( -8,  -9, 16, 14, 35, 46)		// #31 - Gold Shield
+	SpriteFrame( -8,  -9, 16, 14, 35, 31)		// #32 - Blast Blue Shield
+	SpriteFrame( -8,  -9, 16, 14, 35, 61)		// #33 - Blast Red Shield
+	SpriteFrame(-8, -9, 16, 14, 18, 121)		// #34 - Flame
+	SpriteFrame(-8, -9, 16, 14, 18, 136)		// #35 - Bubble
+	SpriteFrame(-8, -9, 16, 14, 18, 151)		// #36 - Thunder
+#endplatform
+
+#platform: Mobile
+	if Options.AttractMode==0
+		LoadSpriteSheet("Global/DPad.gif")
+
+		Object[25].Type = TypeName[Debug Mode]
+		Object[25].Priority		 = PRIORITY_ACTIVE
+		Object[25].DrawOrder	 = 6
+		Object[25].InkEffect	 = INK_ALPHA
+		Object[25].Fade 		 = 0
+		Object[25].PauseFade	 = 0
+		Object[25].PauseXPos	 = Screen.XSize
+		Object[25].PauseXPos	-= 68
+		Object[25].AButtonXPos	 = Screen.XSize
+
+		if Engine.PlatformID == RETRO_WP7
+			Object[25].AButtonXPos  -= 69
+			Object[25].DPadXPos		 = 24
+			Options.DPadX			 = 56
+		else
+			Object[25].AButtonXPos  -= 61
+			Object[25].DPadXPos		 = 16
+			Options.DPadX			 = 48
+		end if
+
+		// This script is only ever used in normal stages, Special Stages have their own TouchControls script
+		// and yet, this check exists anyways...
+		if Stage.ActiveList == SPECIAL_STAGE
+			Object[25].PauseXPos += 42
+		end if
+
+		SpriteFrame(0, 0, 64, 64, 0, 64)		// #0  - D-Pad
+		SpriteFrame(26, 0, 12, 25, 26, 0)		// #1  - Up
+		SpriteFrame(26, 38, 12, 26, 26, 38)		// #2  - Down
+		SpriteFrame(0, 25, 26, 13, 0, 25)		// #3  - Left
+		SpriteFrame(38, 25, 26, 13, 38, 25)		// #4  - Right
+		SpriteFrame(26, 0, 12, 25, 116, 64)		// #5  - Pressed Up
+		SpriteFrame(26, 38, 12, 26, 116, 102)	// #6  - Pressed Down
+		SpriteFrame(0, 25, 26, 13, 89, 101)		// #7  - Pressed Left
+		SpriteFrame(38, 25, 26, 13, 89, 115)	// #8  - Presset Right
+		SpriteFrame(0, 0, 48, 48, 65, 0)		// #9  - A Button
+		SpriteFrame(0, 0, 48, 48, 65, 49)		// #10 - Pressed A Button
+		SpriteFrame(0, 0, 16, 16, 72, 111)		// #11 - Pause
+	end if
+#endplatform
+end sub
+
+sub RSDK
+	LoadSpriteSheet("Global/Display.gif")
+	SetEditorIcon(Icon0,SingleIcon,-16,-16,32,32,1,143)
+end sub

@@ -1,0 +1,76 @@
+//------------Sonic CD SkimmerBullet Script-------------//
+//--------Scripted by Christian Whitehead 'The Taxman'--------//
+//-------Unpacked By Rubberduckycooly's Script Unpacker-------//
+
+//-------Aliases-------//
+#alias Object.Value0	:	Object.FrameTimer
+#alias Object.Value1	:	Object.XVelocity
+#alias Object.Value2	:	Object.YVelocity
+
+#alias 1	:	BLUE_SHIELD
+
+sub ObjectMain
+	Object.XPos += Object.XVelocity
+	Object.YPos += Object.YVelocity
+	if Object.OutOfBounds == true
+		Object.Type = TypeName[Blank Object]
+	end if
+end sub
+
+
+sub ObjectPlayerInteraction
+	ArrayPos0  = Player.EntityNo
+	ArrayPos0 += 2
+	if Object[ArrayPos0].Type == TypeName[Ring Sparkle]
+		PlayerObjectCollision(C_TOUCH, -24, -24, 24, 24)
+		if CheckResult == true
+			CallFunction(Shield_Deflect)
+		end if
+	else
+		PlayerObjectCollision(C_TOUCH, -4, -4, 4, 4)
+		if CheckResult == true
+			if Player.Shield > BLUE_SHIELD
+				CallFunction(Shield_Deflect)
+			else
+				CallFunction(Player_Hit)
+			end if
+		end if
+	end if
+end sub
+
+
+sub ObjectDraw
+	DrawSprite(Object.Frame)
+	Object.FrameTimer++
+	if Object.FrameTimer > 5
+		Object.FrameTimer = 0
+		Object.Frame++
+		Object.Frame &= 1
+	end if
+end sub
+
+
+sub ObjectStartup
+	LoadSpriteSheet("R4/Objects.gif")
+
+	SpriteFrame(-4, -4, 8, 8, 197, 52)	// #0 - Skimmer Bullet Frame 0
+	SpriteFrame(-4, -4, 8, 8, 197, 60)	// #1 - Skimmer Buller Frame 1
+end sub
+
+
+// ========================
+// Editor Subs
+// ========================
+
+sub RSDKDraw
+	DrawSprite(0)
+end sub
+
+
+sub RSDKLoad
+	LoadSpriteSheet("R4/Objects.gif")
+
+	SpriteFrame(-4, -4, 8, 8, 197, 52)	// #0 - Skimmer Bullet
+
+	SetVariableAlias(ALIAS_VAR_PROPVAL, "unused")
+end sub

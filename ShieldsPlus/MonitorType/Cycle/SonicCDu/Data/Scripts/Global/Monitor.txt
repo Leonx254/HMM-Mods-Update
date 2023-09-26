@@ -1,0 +1,381 @@
+//------------Sonic CD Monitor Script-------------//
+//--------Scripted by Christian Whitehead 'The Taxman'--------//
+//-------Unpacked By Rubberduckycooly's Script Unpacker-------//
+
+// Aliases
+#alias Object.Value1	:	Object.GravityStrength
+#alias Object.Value2	:	Object.CollisionPlane
+#alias Object.Value3	:	Player.LifeIcon
+#alias Object.Value4	:	Shield.Type
+#alias Object.Value5	:	Object.IsGoldShield
+#alias Object.Value6	:	Shield.TypeOffset
+
+// Broken Monitor Aliases
+#alias Object.Value0	:	BrokenMonitor.YVelocity
+#alias Object.Value1	:	BrokenMonitor.Timer
+#alias Object.Priority	:	BrokenMonitor.Priority
+#alias Object.Alpha		:	BrokenMonitor.Alpha
+
+#alias Player.Value10	:	Player.JumpAbility
+
+// Gravity
+#alias 1	:	GRAVITY_AIR
+
+// States
+#alias 0	:	MONITOR_IDLE
+#alias 1	:	MONITOR_FALLING
+
+// Priority
+#alias 1	:	PRIORITY_ACTIVE
+
+// Collision Sides
+#alias 0	:	CSIDE_FLOOR
+
+// Hit Values
+#alias 4	:	PLAYER_COL_ROOF
+
+// Global SFX
+#alias 8	:	SFX_G_DESTROY
+
+#alias 0	:	PLAYER_SONIC_A
+#alias 1	:	PLAYER_TAILS_A
+
+// Property Values
+#alias 1	:	SCREEN_RING
+#alias 2	:	SCREEN_SHIELD
+#alias 3	:	SCREEN_INVINCIBILITY
+#alias 4	:	SCREEN_POWER_SNEAKERS
+#alias 5	:	SCREEN_SONIC
+#alias 6	:	SCREEN_TIME
+#alias 7	:	SCREEN_TAILS
+#alias 8	:	SCREEN_S_MONITOR
+#alias 9	:	SCREEN_KNUCKLES
+#alias 10	:	SCREEN_AMY
+
+// Standalone:
+//#alias 9	:	SCREEN_STATIC1
+//#alias 10	:	SCREEN_STATIC2
+// Origins:
+//#alias 11	:	SCREEN_STATIC1
+//#alias 12	:	SCREEN_STATIC2
+// Using values bigger than 9(or 11 in origins) on a level editor will swap the collision plane
+// and restart the cycle, with 10/12 being Ring monitor
+
+// Players
+#alias 1	:	PLAYER_TAILS
+
+// Game Mode Aliases
+#alias 2	:	MODE_TIMEATTACK
+
+// Collision Plane
+#alias 1	:	COLLISION_PLANE_B
+
+sub ObjectMain
+	if Object.State == MONITOR_FALLING
+		Object.GravityStrength += 0x3800
+		Object.YPos			   += Object.GravityStrength
+		
+		if Object.GravityStrength >= 0
+			ObjectTileCollision(CSIDE_FLOOR, 0, 16, 0)
+			if CheckResult == true
+				Object.GravityStrength = 0
+				Object.State = MONITOR_IDLE
+			end if
+		end if
+	end if
+end sub
+
+
+sub ObjectPlayerInteraction
+	if Player.CollisionPlane == Object.CollisionPlane
+		TempValue0 = false
+		if Player.Gravity == GRAVITY_AIR
+			if Player.YVelocity < 0
+				TempValue0 = true
+			end if
+		end if
+
+		if TempValue0 == false
+			// Technically also part of the origins code below
+			// but it would make a mess just for keeping essentially the same check so
+			CheckResult = false
+			if Player.Animation == ANI_JUMPING
+				CheckResult = true
+			end if
+#platform: Use_Origins
+			if Stage.PlayerListPos == PLAYER_KNUCKLES
+				if Player.Animation == ANI_GLIDING
+					CheckResult = true
+				end if
+				if Player.Animation == ANI_GLIDING_STOP
+					CheckResult = true
+				end if
+			end if
+			
+			if Stage.PlayerListPos == PLAYER_AMY
+				if Player.Animation == ANI_HAMMER_JUMP
+					CheckResult = true
+				end if
+				if Player.Animation == ANI_HAMMER_DASH
+					CheckResult = true
+				end if
+			end if
+#endplatform
+			if CheckResult == true
+				ArrayPos0  = Player.EntityNo
+				ArrayPos0 += 2
+				if Object[ArrayPos0].Type == TypeName[Ring Sparkle]
+					PlayerObjectCollision(C_TOUCH, -24, -24, 24, 24)
+				else
+					PlayerObjectCollision(C_TOUCH, -16, -14, 16, 16)
+				end if
+				if CheckResult == true
+					Object.State = MONITOR_IDLE
+
+					CreateTempObject(TypeName[Smoke Puff], 0, Object.XPos, Object.YPos)
+
+					Object[TempObjectPos].DrawOrder = 4
+
+					FlipSign(Player.YVelocity)
+					if Player.YVelocity > -0x20000
+						Player.YVelocity = -0x20000
+					end if
+
+					Object.Type = TypeName[Broken Monitor]
+					BrokenMonitor.Priority	= PRIORITY_ACTIVE
+					BrokenMonitor.Alpha		= 255
+					BrokenMonitor.YVelocity = Object.YPos
+					BrokenMonitor.Timer		= -0x30000
+					PlaySfx(SFX_G_DESTROY, false)
+				
+#platform: Use_Haptics
+					HapticEffect(16, 0, 0, 0)
+#endplatform
+				end if
+			else
+				PlayerObjectCollision(C_BOX, -15, -14, 15, 16)
+			end if
+		else
+			PlayerObjectCollision(C_BOX, -15, -16, 15, 16)
+			if CheckResult == PLAYER_COL_ROOF
+				Object.State			= MONITOR_FALLING
+				Object.GravityStrength	= -0x20000
+
+				Player.YVelocity = 0x20000
+			end if
+		end if
+	end if
+end sub
+
+
+sub ObjectDraw
+	DrawSprite(0)
+	Object.Frame++
+	if Object.Frame > 17
+		if Object.PropertyValue == SCREEN_SHIELD
+			if Object.IsGoldShield != true
+				Shield.Type  = Ring.Frame
+				Shield.Type &= 11
+			end if
+		end if
+		Object.Frame = 0
+	end if
+
+	switch Object.Frame
+	case 0
+	case 1
+		break
+	case 6
+	case 7
+		DrawSpriteFX(14, FX_INK, Object.XPos, Object.YPos)
+		break
+	case 12
+	case 13
+		DrawSpriteFX(15, FX_INK, Object.XPos, Object.YPos)
+		break
+	default
+		if Object.PropertyValue == SCREEN_SHIELD
+			if Player.GravityStrength == 4096
+				switch Shield.Type
+				case 0
+				case 2
+					DrawSprite(2)
+					break
+				case 1
+				case 3
+					DrawSprite(12)
+					break
+				case 4
+					DrawSprite(19)
+					break
+				end switch
+			else
+				switch Shield.Type
+				case 0
+					DrawSprite(2)
+					break
+				case 1
+					DrawSprite(11)
+					break
+				case 2
+					DrawSprite(12)
+					break
+				case 3
+					DrawSprite(13)
+					break
+				case 4
+					DrawSprite(19)
+					break
+				end switch
+			end if
+		else
+			DrawSprite(Object.PropertyValue)
+		end if
+	end switch
+end sub
+
+
+
+sub ObjectStartup
+	LoadSpriteSheet("Global/Items.gif")
+	SpriteFrame(-16, -16, 32, 32, 52,  1)	// #0 - Monitor
+	SpriteFrame( -8,  -9, 16, 14, 18,  1)	// #1 - Rings
+	switch Game.BlueShieldDesign
+	case 0
+		SpriteFrame(-8, -9, 16, 14, 18, 16)		// #2 - Blue Shield
+		break
+	case 1
+		SpriteFrame(-8, -9, 16, 14, 53, 48)		// #2 - S2 Blue Shield
+		break
+	case 2
+		SpriteFrame(-8, -9, 16, 14, 35, 31)		// #2 - 3D Blast Blue Shield
+		break
+	case 3
+		SpriteFrame(-8, -9, 16, 14, 53, 33)		// #2 - Chaotix Blue Shield
+		break
+	end switch
+	SpriteFrame( -8,  -9, 16, 14, 18, 31)	// #3 - Invincibility
+	SpriteFrame( -8,  -9, 16, 14, 18, 46)	// #4 - Speed Shoes
+#platform: Use_Origins
+	if game.coinMode == false
+		SpriteFrame( -8, -9, 16, 14, 18,  61)	// #5  - Sonic 1UP
+		SpriteFrame( -8, -9, 16, 14, 18,  76)	// #6  - Time
+		SpriteFrame( -8, -9, 16, 14, 18,  91)	// #7  - Tails 1UP
+		SpriteFrame( -8, -9, 16, 14, 18, 106)	// #8  - S Icon
+		SpriteFrame( -8, -9, 16, 14, 18, 166)	// #9  - Knuckles 1UP
+		SpriteFrame( -8, -9, 16, 14, 35, 166)	// #10 - Amy 1UP
+	else
+		SpriteFrame( -8, -9, 16, 14, 35, 151)	// #5  - Coin Monitor (Sonic)
+		SpriteFrame( -8, -9, 16, 14, 18,  76)	// #6  - Time
+		SpriteFrame( -8, -9, 16, 14, 35, 151)	// #7  - Coin Monitor (Tails)
+		SpriteFrame( -8, -9, 16, 14, 18, 106)	// #8  - S Monitor
+		SpriteFrame( -8, -9, 16, 14, 35, 151)	// #9  - Coin Monitor (Knuckles)
+		SpriteFrame( -8, -9, 16, 14, 35, 151)	// #10 - Coin Monitor (Amy)
+	end if
+#endplatform
+
+#platform: Use_Standalone
+	SpriteFrame( -8, -9, 16, 14, 18,  61)	// #5  - Sonic 1UP
+	SpriteFrame( -8, -9, 16, 14, 18,  76)	// #6  - Time
+	SpriteFrame( -8, -9, 16, 14, 18,  91)	// #7  - Tails Monitor
+	SpriteFrame( -8, -9, 16, 14, 18, 106)	// #8  - S Monitor
+	SpriteFrame( -8,  -9, 16, 14, 18, 121)	// #9  - Flame
+	SpriteFrame( -8,  -9, 16, 14, 18, 121)	// #10 - Flame
+#endplatform
+
+	SpriteFrame( -8,  -9, 16, 14, 18, 121)	// #11 - Flame
+	SpriteFrame( -8,  -9, 16, 14, 18, 136)	// #12 - Bubble
+	SpriteFrame( -8,  -9, 16, 14, 18, 151)	// #13 - Thunder
+	SpriteFrame( -8,  -9, 16, 14, 35,  1)	// #14 - Static1
+	SpriteFrame( -8,  -9, 16, 14, 35, 16)	// #15 - Static2
+	SpriteFrame( -8,  -9, 16, 14, 53, 63)	// #16 - Default 1up
+	SpriteFrame( -8,  -9, 16, 14, 35, 31)	// #17 - Blast Blue Shield
+	SpriteFrame( -8,  -9, 16, 14, 35, 61)	// #18 - Blast Red Shield
+	SpriteFrame( -8,  -9, 16, 14, 35, 46)	// #19 - Gold Shield
+
+#platform: Use_Standalone
+	ArrayPos0 = 32
+	while ArrayPos0 < 1056
+		if Object[ArrayPos0].Type == TypeName[Monitor]
+			if Object[ArrayPos0].PropertyValue > 9
+				Object[ArrayPos0].PropertyValue -= 10
+				Object[ArrayPos0].DrawOrder = 1
+				Object[ArrayPos0].CollisionPlane = COLLISION_PLANE_B
+			end if
+			Player[ArrayPos0].LifeIcon = 16
+			if Object[ArrayPos0].PropertyValue == SCREEN_SONIC
+				if Stage.PlayerListPos == PLAYER_SONIC_A
+					Player[ArrayPos0].LifeIcon = SCREEN_SONIC
+				end if
+				if Stage.PlayerListPos == PLAYER_TAILS_A
+					Player[ArrayPos0].LifeIcon = SCREEN_TAILS
+				end if
+			end if
+		end if
+		ArrayPos0++
+	loop
+#endplatform
+
+#platform: Use_Origins
+	// Note - (used to be a Bug Detail but then they fixed it :():
+	// Sonic Team adjusted how Monitors' plane value work in Plus.. but they didn't actually update the scenes for it
+	// In 99% of cases it doesn't matter, since almost all monitors are Plane A,
+	//   but monitors that are intended to be Plane B monitors never had their property values updated.. leading to the weird invalid monitor in Metallic Madness 2
+	// (this got fixed in 2.01, but leaving these comments here anyways)
+	ArrayPos0 = 32
+	while ArrayPos0 < 1056
+		if Object[ArrayPos0].Type == TypeName[Monitor]
+			if Object[ArrayPos0].PropertyValue > 11
+				Object[ArrayPos0].PropertyValue -= 12
+				Object[ArrayPos0].DrawOrder = 1
+				Object[ArrayPos0].CollisionPlane = COLLISION_PLANE_B
+			end if
+			Player[ArrayPos0].LifeIcon = 16
+			if Object[ArrayPos0].PropertyValue == SCREEN_SONIC
+				if Stage.PlayerListPos == PLAYER_SONIC
+					Player[ArrayPos0].LifeIcon = SCREEN_SONIC
+				end if
+				if Stage.PlayerListPos == PLAYER_TAILS
+					Player[ArrayPos0].LifeIcon = SCREEN_TAILS
+				end if
+				
+				if Stage.PlayerListPos == PLAYER_KNUCKLES
+					Player[ArrayPos0].LifeIcon = SCREEN_KNUCKLES
+				end if
+				
+				if Stage.PlayerListPos == PLAYER_AMY
+					Player[ArrayPos0].LifeIcon = SCREEN_AMY
+				end if
+			end if
+		end if
+		ArrayPos0++
+	loop
+#endplatform
+
+	ArrayPos0 = 32
+	while ArrayPos0 < 1056
+		if Object[ArrayPos0].Type == TypeName[Monitor]
+			if Object[ArrayPos0].PropertyValue == SCREEN_SONIC
+				Object[ArrayPos0].PropertyValue = Player.LifeIcon
+			end if
+		end if
+		ArrayPos0++
+	loop
+
+	if Options.GameMode == MODE_TIMEATTACK
+		ArrayPos0 = 32
+		while ArrayPos0 < 1056
+			if Object[ArrayPos0].Type == TypeName[Monitor]
+				if Object[ArrayPos0].PropertyValue == SCREEN_SONIC
+					Object[ArrayPos0].Type = TypeName[BlankObject]
+				end if
+			end if
+			ArrayPos0++
+		loop
+	end if
+end sub
+
+sub RSDK
+	LoadSpriteSheet("Global/Display.gif")
+	SetEditorIcon(Icon0,SingleIcon,-16,-16,32,32,1,143)
+end sub

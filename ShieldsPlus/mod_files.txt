@@ -3,4 +3,4 @@ add mod.json
 add KeepShields/Reset/SonicCDu/Data/Scripts/Global/BlueShield.txt
 add KeepShields/Periods/SonicCDu/Data/Scripts/Global/BlueShield.txt
 add KeepShields/ActsAndPeriods/SonicCDu/Data/Scripts/Global/BlueShield.txt
-remove SonicCDu/Data/Scripts/Global/BlueShield.txt
+delete SonicCDu/Data/Scripts/Global/BlueShield.txt

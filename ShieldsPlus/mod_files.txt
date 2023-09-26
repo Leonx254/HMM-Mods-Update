@@ -1,6 +1,6 @@
-add mod.ini
-add mod.json
 add KeepShields/Reset/SonicCDu/Data/Scripts/Global/BlueShield.txt
 add KeepShields/Periods/SonicCDu/Data/Scripts/Global/BlueShield.txt
 add KeepShields/ActsAndPeriods/SonicCDu/Data/Scripts/Global/BlueShield.txt
 delete SonicCDu/Data/Scripts/Global/BlueShield.txt
+add mod.json
+add mod.ini

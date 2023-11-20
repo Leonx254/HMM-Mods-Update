@@ -10,17 +10,17 @@
 // ========================
 
 // Variables
-private alias object.value0		:	object.fallbackTimer // Added in Origins 2.01
-private alias object.value1		:	object.spinCount
-private alias object.value2		:	object.spinTimer
-private alias object.value3		:	object.activePlayers
-private alias object.value4		:	object.allPlayersFinished
-private alias object.value5		:	object.lastPlayerID
+private alias object.value0 	:	object.fallbackTimer // Added in Origins 2.01
+private alias object.value1 	:	object.spinCount
+private alias object.value2 	:	object.spinTimer
+private alias object.value3 	:	object.activePlayers
+private alias object.value4 	:	object.allPlayersFinished
+private alias object.value5 	:	object.lastPlayerID
 
-private alias Object.Value6		:	Object.XCenter
-private alias Object.Value7		:	Object.YCenter
-private alias Object.Value8		:	Object.ZCenter
-private alias Object.Value9		:	Object.pointX
+private alias Object.Value6 	:	Object.XCenter
+private alias Object.Value7 	:	Object.YCenter
+private alias Object.Value8 	:	Object.ZCenter
+private alias Object.Value9 	:	Object.pointX
 private alias Object.Value10	:	Object.pointY
 private alias Object.Value11	:	Object.pointZ
 
@@ -120,27 +120,27 @@ public value SignPost_initFallback  = 0
 public value SignPost_fallbackCheck = 0
 
 private table SignPost_VectorPoint
-	0,  0, -28
-	8,  0, -28
-	8, 64, -28
-	0, 64, -28
+	0,  0, -30
+	8,  0, -30
+	8, 64, -30
+	0, 64, -30
 
-	0,  0,  28
-	8,  0,  28
-	8, 64,  28
-	0, 64,  28
+	0,  0,  30
+	8,  0,  30
+	8, 64,  30
+	0, 64,  30
 end table
 
 private table SignPost_VectorPointSignTop
-	0, 62, -2
-	8, 62, -2
-	8, 66, -2
-	0, 66, -2
+	0, 62, -4
+	8, 62, -4
+	8, 68, -4
+	0, 68, -4
 
-	0, 62,  2
-	8, 62,  2
-	8, 66,  2
-	0, 66,  2
+	0, 62,  4
+	8, 62,  4
+	8, 68,  4
+	0, 68,  4
 end table
 
 private table SignPost_VectorX[8]
@@ -161,6 +161,8 @@ private function SignPost_DebugSpawn
 	CreateTempObject(TypeName[Sign Post], 0, object.xpos, object.ypos)
 	object[tempObjectPos].frame = 1
 	object[tempObjectPos].spinCount = 16
+	object[tempObjectPos].spinRot     = 372
+	object[tempObjectPos].rotIncrease = 32
 	if options.vsMode == true
 		object[tempObjectPos].state = SIGNPOST_IDLE_VS
 	end if
@@ -277,22 +279,18 @@ private function SignPost_DrawFrontFace
 	VertexBuffer[12].x  = VertexBuffer[3].x
 	VertexBuffer[12].y  = VertexBuffer[3].y
 	VertexBuffer[12].z  = VertexBuffer[3].z
-	VertexBuffer[12].x += 1
 
 	VertexBuffer[13].x  = VertexBuffer[2].x
 	VertexBuffer[13].y  = VertexBuffer[2].y
 	VertexBuffer[13].z  = VertexBuffer[2].z
-	VertexBuffer[13].x += 1
 
 	VertexBuffer[14].x  = VertexBuffer[6].x
 	VertexBuffer[14].y  = VertexBuffer[6].y
 	VertexBuffer[14].z  = VertexBuffer[6].z
-	VertexBuffer[14].x -= 1
 
 	VertexBuffer[15].x  = VertexBuffer[7].x
 	VertexBuffer[15].y  = VertexBuffer[7].y
 	VertexBuffer[15].z  = VertexBuffer[7].z
-	VertexBuffer[15].x -= 1
 end function
 
 private function SignPost_DrawLeftFace
@@ -500,7 +498,6 @@ event ObjectUpdate
 #endplatform
 				stage.timeEnabled = false
 				object.state = SIGNPOST_SPUN
-				object.rotIncrease = 32
 #platform: USE_ORIGINS
 				SignPost_initFallback = object.fallbackTimer
 #endplatform
@@ -551,7 +548,7 @@ event ObjectUpdate
 			end if
 
 			if object.spinCount <= 0
-				if object.spinRot >= 128
+				if object.spinRot >= 116
 					if object.spinRot <= 144
 						object.spinRot = 0
 						object.rotIncrease = 0
@@ -728,30 +725,44 @@ event ObjectUpdate
 				CreateTempObject(TypeName[Ring Sparkle], 0, temp0, temp1)
 				
 				object.spinCount--
-				if object.spinCount == 0
-					if object.allPlayersFinished == false
-						object.allPlayersFinished = true
-						object.state = SIGNPOST_IDLE_VS
-						
+			end if
+
+			if Object.Frame == 9
+				object.rotIncrease -= 2
+				if object.rotIncrease < 4
+					object.rotIncrease = 4
+				end if
+				object.frame = 1
+			end if
+
+			if object.spinCount <= 0
+				if object.spinRot >= 116
+					if object.spinRot <= 144
+						object.spinRot = 0
+						object.rotIncrease = 0
+						if object.allPlayersFinished == false
+							object.allPlayersFinished = true
+							object.state = SIGNPOST_IDLE_VS
 #platform: USE_STANDALONE
-						if object.lastPlayerID == 0
-							// Start spectating P2
-							camera[0].target 			= 1
-							player[1].scrollTracking 	= true
-							object[9].type = TypeName[Blank Object]
-							CreateTempObject(TypeName[VS Game], 0, object.xpos, object.ypos)
-							vsGame[tempObjectPos].timer = 384
-							object[tempObjectPos].state = VSGAME_FADEOUT
-							camera[0].xpos = player[1].xpos
-							camera[0].xpos >>= 16
-							camera[0].ypos = player[1].ypos
-							camera[0].ypos >>= 16
-						end if
+							if object.lastPlayerID == 0
+								// Start spectating P2
+								camera[0].target 			= 1
+								player[1].scrollTracking 	= true
+								object[9].type = TypeName[Blank Object]
+								CreateTempObject(TypeName[VS Game], 0, object.xpos, object.ypos)
+								vsGame[tempObjectPos].timer = 384
+								object[tempObjectPos].state = VSGAME_FADEOUT
+								camera[0].xpos = player[1].xpos
+								camera[0].xpos >>= 16
+								camera[0].ypos = player[1].ypos
+								camera[0].ypos >>= 16
+							end if
 #endplatform
-					else
-						object.state = SIGNPOST_FINISHED
-						object[30].state = VSGAME_GOTOVSRESULTS
-						vsGame[30].timer = -768
+						else
+							object.state = SIGNPOST_FINISHED
+							object[30].state = VSGAME_GOTOVSRESULTS
+							vsGame[30].timer = -768
+						end if
 					end if
 				end if
 			end if
@@ -917,6 +928,8 @@ event ObjectStartup
 			if object[arrayPos0].propertyValue != 2
 				object[arrayPos0].priority = PRIORITY_XBOUNDS
 			end if
+			object[arrayPos0].spinRot     = 372
+			object[arrayPos0].rotIncrease = 32
 		end if
 
 		if options.vsMode == true

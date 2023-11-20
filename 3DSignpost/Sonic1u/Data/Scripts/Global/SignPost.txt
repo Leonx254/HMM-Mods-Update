@@ -10,13 +10,13 @@
 // ========================
 
 // Variables
-private alias object.value0		: object.spinCount
-private alias object.value1		: object.timer
+private alias object.value0 	:	object.spinCount
+private alias object.value1 	:	object.timer
 
-private alias Object.Value6		:	Object.XCenter
-private alias Object.Value7		:	Object.YCenter
-private alias Object.Value8		:	Object.ZCenter
-private alias Object.Value9		:	Object.pointX
+private alias Object.Value6 	:	Object.XCenter
+private alias Object.Value7 	:	Object.YCenter
+private alias Object.Value8 	:	Object.ZCenter
+private alias Object.Value9 	:	Object.pointX
 private alias Object.Value10	:	Object.pointY
 private alias Object.Value11	:	Object.pointZ
 
@@ -106,27 +106,27 @@ reserve function SignPost_DrawTopSideFace
 // ========================
 
 private table SignPost_VectorPoint
-	0,  0, -28
-	8,  0, -28
-	8, 64, -28
-	0, 64, -28
+	0,  0, -30
+	8,  0, -30
+	8, 64, -30
+	0, 64, -30
 
-	0,  0,  28
-	8,  0,  28
-	8, 64,  28
-	0, 64,  28
+	0,  0,  30
+	8,  0,  30
+	8, 64,  30
+	0, 64,  30
 end table
 
 private table SignPost_VectorPointSignTop
-	0, 62, -2
-	8, 62, -2
-	8, 66, -2
-	0, 66, -2
+	0, 62, -4
+	8, 62, -4
+	8, 68, -4
+	0, 68, -4
 
-	0, 62,  2
-	8, 62,  2
-	8, 66,  2
-	0, 66,  2
+	0, 62,  4
+	8, 62,  4
+	8, 68,  4
+	0, 68,  4
 end table
 
 private table SignPost_VectorX[8]
@@ -146,6 +146,8 @@ private function SignPost_DebugSpawn
 	CreateTempObject(TypeName[Sign Post], 0, object.xpos, object.ypos)
 	object[tempObjectPos].frame = 1
 	object[tempObjectPos].spinCount = 16
+	object[tempObjectPos].spinRot     = 372
+	object[tempObjectPos].rotIncrease = 32
 end function
 
 
@@ -260,22 +262,18 @@ private function SignPost_DrawFrontFace
 	VertexBuffer[12].x  = VertexBuffer[3].x
 	VertexBuffer[12].y  = VertexBuffer[3].y
 	VertexBuffer[12].z  = VertexBuffer[3].z
-	VertexBuffer[12].x += 1
 
 	VertexBuffer[13].x  = VertexBuffer[2].x
 	VertexBuffer[13].y  = VertexBuffer[2].y
 	VertexBuffer[13].z  = VertexBuffer[2].z
-	VertexBuffer[13].x += 1
 
 	VertexBuffer[14].x  = VertexBuffer[6].x
 	VertexBuffer[14].y  = VertexBuffer[6].y
 	VertexBuffer[14].z  = VertexBuffer[6].z
-	VertexBuffer[14].x -= 1
 
 	VertexBuffer[15].x  = VertexBuffer[7].x
 	VertexBuffer[15].y  = VertexBuffer[7].y
 	VertexBuffer[15].z  = VertexBuffer[7].z
-	VertexBuffer[15].x -= 1
 end function
 
 private function SignPost_DrawLeftFace
@@ -415,7 +413,6 @@ event ObjectUpdate
 			Stage.NewYBoundary2   = Object.YPos
 			Stage.NewYBoundary2 >>= 16
 			Stage.NewYBoundary2  += Screen.ycenter
-			Stage.NewYBoundary2  -= 32
 		end if
 
 		temp0 = object.ypos
@@ -449,7 +446,6 @@ event ObjectUpdate
 #endplatform
 				stage.timeEnabled = false
 				object.state = SIGNPOST_SPINNING
-				object.rotIncrease = 32
 				PlaySfx(SfxName[Sign Post], false)
 				if Player_superState == SUPERSTATE_SUPER
 					Player_superState = SUPERSTATE_UNTRANSFORM
@@ -492,7 +488,7 @@ event ObjectUpdate
 			end if
 
 			if object.spinCount <= 0
-				if object.spinRot >= 128
+				if object.spinRot >= 116
 					if object.spinRot <= 144
 						object.spinRot = 0
 						object.rotIncrease = 0
@@ -786,9 +782,11 @@ event ObjectStartup
 	end switch
 	
 	foreach (TypeName[Sign Post], arrayPos0, ALL_ENTITIES)
-		object[arrayPos0].frame = 1
-		object[arrayPos0].spinCount = 16
-		object[arrayPos0].priority = PRIORITY_XBOUNDS
+		object[arrayPos0].frame       = 1
+		object[arrayPos0].spinCount   = 16
+		object[arrayPos0].priority    = PRIORITY_XBOUNDS
+		object[arrayPos0].spinRot     = 372
+		object[arrayPos0].rotIncrease = 32
 	next
 	
 	SetTableValue(TypeName[Sign Post], DebugMode_ObjCount, DebugMode_TypesTable)

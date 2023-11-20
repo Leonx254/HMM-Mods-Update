@@ -25,9 +25,19 @@
             "MinValue": null,
             "MaxValue": null,
             "DefaultValue": ".\\S1SpriteOptimization/Enabled\\"
+          },          {
+            "Name": "IncludeDir3",
+            "Description": [
+              "Improves rendering of the 3D Signpost, at the cost of reduced compatibility with other signpost sprite mods"
+            ],
+            "DisplayName": "Fix GHZ1 signpost area",
+            "Type": "GHZFixEnum",
+            "MinValue": null,
+            "MaxValue": null,
+            "DefaultValue": ".\\S1GHZ1Fix/Enabled\\"
           },
           {
-            "Name": "IncludeDir3",
+            "Name": "IncludeDir4",
             "Description": [
               "Improves rendering of the 3D Signpost, at the cost of reduced compatibility with other signpost sprite mods"
             ],
@@ -70,6 +80,22 @@
           "Value": ".\\S1SpriteOptimization/Disabled\\",
           "Description": [
             "3D signpost will display visual artifacts unless another mod optimizes the spritesheet"
+          ]
+        }
+      ],
+      "GHZFixEnum": [
+        {
+          "DisplayName": "Enabled (Default)",
+          "Value": ".\\S1GHZ1Fix/Enabled\\",
+          "Description": [
+            "Updates GHZ1 layout to add foreground chunks below the signpost"
+          ]
+        },
+        {
+          "DisplayName": "Disabled",
+          "Value": ".\\S1GHZ1Fix/Disabled\\",
+          "Description": [
+            "Vanilla GHZ1"
           ]
         }
       ],

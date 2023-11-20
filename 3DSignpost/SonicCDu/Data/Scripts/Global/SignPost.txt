@@ -49,7 +49,6 @@
 
 // Priority
 #alias 1	:	PRIORITY_ACTIVE
-#alias 2 : PRIORITY_ALWAYS         // Object will always update
 #alias 3	:	PRIORITY_XBOUNDS
 
 // Face Aliases
@@ -77,43 +76,43 @@ function SignPost_GetBoxCenter
 		case 0
 			object.ZCenter +=   0
 			object.YCenter +=   0
-			object.XCenter += -28
+			object.XCenter += -30
 			break
 		case 1
 			object.ZCenter +=   8
 			object.YCenter +=   0
-			object.XCenter += -28
+			object.XCenter += -30
 			break
 		case 2
 			object.ZCenter +=   8
 			object.YCenter +=  64
-			object.XCenter += -28
+			object.XCenter += -30
 			break
 		case 3
 			object.ZCenter +=   0
 			object.YCenter +=  64
-			object.XCenter += -28
+			object.XCenter += -30
 			break
 
 		case 4
 			object.ZCenter +=  0
 			object.YCenter +=  0
-			object.XCenter += 28
+			object.XCenter += 30
 			break
 		case 5
 			object.ZCenter +=  8
 			object.YCenter +=  0
-			object.XCenter += 28
+			object.XCenter += 30
 			break
 		case 6
 			object.ZCenter +=  8
 			object.YCenter += 64
-			object.XCenter += 28
+			object.XCenter += 30
 			break
 		case 7
 			object.ZCenter +=  0
 			object.YCenter += 64
-			object.XCenter += 28
+			object.XCenter += 30
 			break
 		end switch
 		ArrayPos0++
@@ -130,43 +129,43 @@ function SignPost_GetRotation
 		case 0
 			object.pointZ =   0
 			object.pointY =   0
-			object.pointX = -28
+			object.pointX = -30
 			break
 		case 1
 			object.pointZ =   8
 			object.pointY =   0
-			object.pointX = -28
+			object.pointX = -30
 			break
 		case 2
 			object.pointZ =   8
-			object.pointY =  64
-			object.pointX = -28
+			object.pointY =  66
+			object.pointX = -30
 			break
 		case 3
 			object.pointZ =   0
-			object.pointY =  64
-			object.pointX = -28
+			object.pointY =  66
+			object.pointX = -30
 			break
 
 		case 4
 			object.pointZ =  0
 			object.pointY =  0
-			object.pointX = 28
+			object.pointX = 30
 			break
 		case 5
 			object.pointZ =  8
 			object.pointY =  0
-			object.pointX = 28
+			object.pointX = 30
 			break
 		case 6
 			object.pointZ =  8
-			object.pointY = 64
-			object.pointX = 28
+			object.pointY = 66
+			object.pointX = 30
 			break
 		case 7
 			object.pointZ =  0
-			object.pointY = 64
-			object.pointX = 28
+			object.pointY = 66
+			object.pointX = 30
 			break
 		end switch
 
@@ -242,22 +241,18 @@ function SignPost_DrawFrontFace
 	VertexBuffer[12].x  = VertexBuffer[3].x
 	VertexBuffer[12].y  = VertexBuffer[3].y
 	VertexBuffer[12].z  = VertexBuffer[3].z
-	VertexBuffer[12].x += 1
 
 	VertexBuffer[13].x  = VertexBuffer[2].x
 	VertexBuffer[13].y  = VertexBuffer[2].y
 	VertexBuffer[13].z  = VertexBuffer[2].z
-	VertexBuffer[13].x += 1
 
 	VertexBuffer[14].x  = VertexBuffer[6].x
 	VertexBuffer[14].y  = VertexBuffer[6].y
 	VertexBuffer[14].z  = VertexBuffer[6].z
-	VertexBuffer[14].x -= 1
 
 	VertexBuffer[15].x  = VertexBuffer[7].x
 	VertexBuffer[15].y  = VertexBuffer[7].y
 	VertexBuffer[15].z  = VertexBuffer[7].z
-	VertexBuffer[15].x -= 1
 end function
 
 function SignPost_DrawLeftFace
@@ -311,43 +306,43 @@ function SignPost_DrawTopSideFace
 		switch ArrayPos0
 		case 0
 			object.ZCenter +=  0
-			object.YCenter +=  62
-			object.XCenter +=-2
+			object.YCenter += 62
+			object.XCenter += -4
 			break
 		case 1
 			object.ZCenter +=  8
-			object.YCenter +=  62
-			object.XCenter +=-2
+			object.YCenter += 62
+			object.XCenter += -4
 			break
 		case 2
 			object.ZCenter +=  8
-			object.YCenter += 66
-			object.XCenter +=-2
+			object.YCenter += 68
+			object.XCenter += -4
 			break
 		case 3
 			object.ZCenter +=  0
-			object.YCenter += 66
-			object.XCenter +=-2
+			object.YCenter += 68
+			object.XCenter += -4
 			break
 		case 4
 			object.ZCenter +=  0
-			object.YCenter +=  62
-			object.XCenter += 2
+			object.YCenter += 62
+			object.XCenter +=  4
 			break
 		case 5
 			object.ZCenter +=  8
-			object.YCenter +=  62
-			object.XCenter += 2
+			object.YCenter += 62
+			object.XCenter +=  4
 			break
 		case 6
 			object.ZCenter +=  8
-			object.YCenter += 66
-			object.XCenter += 2
+			object.YCenter += 68
+			object.XCenter +=  4
 			break
 		case 7
 			object.ZCenter +=  0
-			object.YCenter += 66
-			object.XCenter += 2
+			object.YCenter += 68
+			object.XCenter +=  4
 			break
 		end switch
 		ArrayPos0++
@@ -362,42 +357,42 @@ function SignPost_DrawTopSideFace
 		case 0
 			object.pointZ =  0
 			object.pointY = 62
-			object.pointX = -2
+			object.pointX = -4
 			break
 		case 1
 			object.pointZ =  8
 			object.pointY = 62
-			object.pointX = -2
+			object.pointX = -4
 			break
 		case 2
 			object.pointZ =  8
-			object.pointY = 66
-			object.pointX = -2
+			object.pointY = 68
+			object.pointX = -4
 			break
 		case 3
 			object.pointZ =  0
-			object.pointY = 66
-			object.pointX = -2
+			object.pointY = 68
+			object.pointX = -4
 			break
 		case 4
 			object.pointZ =  0
 			object.pointY = 62
-			object.pointX =  2
+			object.pointX =  4
 			break
 		case 5
 			object.pointZ =  8
 			object.pointY = 62
-			object.pointX =  2
+			object.pointX =  4
 			break
 		case 6
 			object.pointZ =  8
-			object.pointY = 66
-			object.pointX =  2
+			object.pointY = 68
+			object.pointX =  4
 			break
 		case 7
 			object.pointZ =  0
-			object.pointY = 66
-			object.pointX =  2
+			object.pointY = 68
+			object.pointX =  4
 			break
 		end switch
 
@@ -483,7 +478,6 @@ sub ObjectMain
 				Stage.TimeEnabled = false
 
 				Object.State = SIGNPOST_FLIP
-				object.rotIncrease = 32
 				Object.Timer = 8
 
 				PlaySfx(SFX_G_SIGNPOST, false)
@@ -542,10 +536,9 @@ sub ObjectMain
 			end if
 
 			if Object.Frame == 9
-
 				object.rotIncrease -= 2
-				if object.rotIncrease < 2
-					object.rotIncrease = 2
+				if object.rotIncrease < 4
+					object.rotIncrease = 4
 				end if
 				// Spawn a ring sparkle at random location close to the sign post
 				Rand(TempValue0, 48)
@@ -675,7 +668,6 @@ sub ObjectDraw
 		TempValue0  -= screen.xoffset
 		TempValue0  *= 2
 		TempValue0  -= screen.xsize
-		TempValue0  -= 2
 
 		TempValue1   = object.iypos
 		TempValue1  -= screen.yoffset
@@ -727,7 +719,9 @@ sub ObjectStartup
 	ArrayPos0 = 32
 	while ArrayPos0 < 1056
 		if Object[ArrayPos0].Type == TypeName[Sign Post]
-			Object[ArrayPos0].SpinRot = 248
+			Object[ArrayPos0].Priority    = PRIORITY_XBOUNDS
+			Object[ArrayPos0].SpinRot     = 248
+			object[ArrayPos0].rotIncrease = 32
 
 			// If needed, let's extend the stage a bit by repeating the last column of chunks
 			if Object[ArrayPos0].PropertyValue < 2

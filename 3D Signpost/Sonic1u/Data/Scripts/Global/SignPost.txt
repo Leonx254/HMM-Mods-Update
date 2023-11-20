@@ -1,0 +1,985 @@
+// ----------------------------------
+// RSDK Project: Sonic 1
+// Script Description: Sign Post Object
+// Script Author: Christian Whitehead/Simon Thomley
+// Unpacked by Rubberduckycooly's script unpacker
+// ----------------------------------
+
+// ========================
+// Aliases
+// ========================
+
+// Variables
+private alias object.value0		: object.spinCount
+private alias object.value1		: object.timer
+
+private alias Object.Value6		:	Object.XCenter
+private alias Object.Value7		:	Object.YCenter
+private alias Object.Value8		:	Object.ZCenter
+private alias Object.Value9		:	Object.pointX
+private alias Object.Value10	:	Object.pointY
+private alias Object.Value11	:	Object.pointZ
+
+private alias Object.Value12	:	Object.rotIncrease
+private alias Object.Value13	:	Object.angle
+private alias Object.Value14	:	Object.spinRot
+
+private alias object.value15	:	object.XVectorPoint
+private alias object.value16	:	object.YVectorPoint
+private alias object.value17	:	object.ZVectorPoint
+
+// States
+private alias 0 : SIGNPOST_AWAITPLAYER
+private alias 1 : SIGNPOST_SPINNING
+private alias 2 : SIGNPOST_HANDLEACTFINISH
+private alias 3 : SIGNPOST_EXITSTAGERIGHT
+private alias 4 : SIGNPOST_TOSPECIALSTAGE
+private alias 5 : SIGNPOST_BLANK // Set by Act Finish in SBZ2 transition
+
+
+// Track Aliases
+private alias 1 : TRACK_ACTFINISH
+
+// Game Mode Aliases
+private alias 0 : MODE_NOSAVE
+private alias 1 : MODE_SAVEGAME
+private alias 2 : MODE_TIMEATTACK
+
+// Player Aliases
+private alias 1 : SUPERSTATE_SUPER
+private alias 2 : SUPERSTATE_UNTRANSFORM
+
+private alias object.type 			: player.type
+private alias object.xpos 			: player.xpos
+private alias object.ypos 			: player.ypos
+private alias object.xvel 			: player.xvel
+private alias object.yvel 			: player.yvel
+private alias object.speed 			: player.speed
+private alias object.gravity 		: player.gravity
+private alias object.up 			: player.up
+private alias object.down 			: player.down
+private alias object.left 			: player.left
+private alias object.right 			: player.right
+private alias object.jumpPress 		: player.jumpPress
+private alias object.jumpHold 		: player.jumpHold
+private alias object.interaction 	: player.interaction
+private alias object.controlMode 	: player.controlMode
+private alias object.value7 		: player.invincibleTimer
+private alias object.animation		: player.animation
+
+// Reserved Object Slot Aliases
+private alias 30 : SLOT_ACTFINISH
+
+// Achievement Aliases
+private alias 1 : ACHIEVEMENT_BLASTPROCESSING
+
+// Face Aliases
+private alias 0 : FACE_TEXTURED_3D
+private alias 1 : FACE_TEXTURED_2D
+private alias 2 : FACE_COLOURED_3D
+private alias 3 : FACE_COLOURED_2D
+private alias 4 : FACE_FADED
+private alias 5 : FACE_TEXTURED_C
+private alias 6 : FACE_TEXTURED_D
+private alias 7 : FACE_SPRITE3D
+
+
+
+// ========================
+// Function Declarations
+// ========================
+
+reserve function SignPost_DebugDraw
+reserve function SignPost_DebugSpawn
+
+reserve function SignPost_GetBoxCenter
+reserve function SignPost_DrawBackFace
+reserve function SignPost_DrawFrontFace
+reserve function SignPost_DrawLeftFace
+reserve function SignPost_DrawRightFace
+reserve function SignPost_DrawTopSideFace
+
+
+
+// ========================
+// Static Values
+// ========================
+
+private table SignPost_VectorPoint
+	0,  0, -28
+	8,  0, -28
+	8, 64, -28
+	0, 64, -28
+
+	0,  0,  28
+	8,  0,  28
+	8, 64,  28
+	0, 64,  28
+end table
+
+private table SignPost_VectorPointSignTop
+	0, 62, -2
+	8, 62, -2
+	8, 66, -2
+	0, 66, -2
+
+	0, 62,  2
+	8, 62,  2
+	8, 66,  2
+	0, 66,  2
+end table
+
+private table SignPost_VectorX[8]
+private table SignPost_VectorY[8]
+private table SignPost_VectorZ[8]
+
+// ========================
+// Function Definitions
+// ========================
+
+private function SignPost_DebugDraw
+	DrawSprite(0)
+	DrawSprite(1)
+end function
+
+private function SignPost_DebugSpawn
+	CreateTempObject(TypeName[Sign Post], 0, object.xpos, object.ypos)
+	object[tempObjectPos].frame = 1
+	object[tempObjectPos].spinCount = 16
+end function
+
+
+private function SignPost_GetBoxCenter
+	// Get the center of the object
+	object.XCenter = 0
+	object.YCenter = 0
+	object.ZCenter = 0
+	
+	ArrayPos0 = 0
+	while ArrayPos0 < 8
+		temp0  = arrayPos0
+		temp0 *= 3
+		GetTableValue(object.XVectorPoint, temp0, SignPost_VectorPoint)
+		temp0++
+		GetTableValue(object.YVectorPoint, temp0, SignPost_VectorPoint)
+		temp0++
+		GetTableValue(object.ZVectorPoint, temp0, SignPost_VectorPoint)
+		object.XCenter += object.XVectorPoint
+		object.YCenter += object.YVectorPoint
+		object.ZCenter += object.ZVectorPoint
+		ArrayPos0++
+	loop
+	object.XCenter /= 8
+	object.YCenter /= 8
+	object.ZCenter /= 8
+end function
+
+private function SignPost_GetRotation
+	arrayPos0 = 0
+	while arrayPos0 < 8
+		temp0  = arrayPos0
+		temp0 *= 3
+		GetTableValue(object.XVectorPoint, temp0, SignPost_VectorPoint)
+		temp0++
+		GetTableValue(object.YVectorPoint, temp0, SignPost_VectorPoint)
+		temp0++
+		GetTableValue(object.ZVectorPoint, temp0, SignPost_VectorPoint)
+		object.pointX = object.XVectorPoint
+		object.pointY = object.YVectorPoint
+		object.pointZ = object.ZVectorPoint
+
+		// Rotate X
+		// X
+		temp0   = object.pointX
+		temp0  -= object.XCenter
+		cos(object.angle, object.spinRot)
+		temp0  *= object.angle
+
+		temp1   = object.pointZ
+		temp1  -= object.ZCenter
+		sin(object.angle, object.spinRot)
+		temp1  *= object.angle
+		temp2  = temp0
+		temp2 -= temp1
+
+		// Z
+		temp0   = object.pointX
+		temp0  -= object.XCenter
+		Sin(object.angle, object.spinRot)
+		temp0  *= object.angle
+
+		temp1   = object.pointZ
+		temp1  -= object.ZCenter
+		Cos(object.angle, object.spinRot)
+		temp1  *= object.angle
+		temp3  = temp0
+		temp3 += temp1
+
+
+		temp2 += object.XCenter
+		temp3 += object.ZCenter
+		temp2 >>= 8
+		temp3 >>= 8
+		
+		VertexBuffer[arrayPos0].x  = object.XCenter
+		VertexBuffer[arrayPos0].x += temp2
+		VertexBuffer[arrayPos0].z  = object.ZCenter
+		VertexBuffer[arrayPos0].z += temp3
+		VertexBuffer[arrayPos0].y  = object.pointY
+		switch arrayPos0
+		case 2
+		case 3
+		case 6
+		case 7
+			VertexBuffer[arrayPos0].y -= 3
+			break
+		end switch
+		ArrayPos0++
+	loop
+end function
+
+private function SignPost_DrawBackFace
+	VertexBuffer[8].x  = VertexBuffer[0].x
+	VertexBuffer[8].y  = VertexBuffer[0].y
+	VertexBuffer[8].z  = VertexBuffer[0].z
+
+	VertexBuffer[9].x  = VertexBuffer[4].x
+	VertexBuffer[9].y  = VertexBuffer[4].y
+	VertexBuffer[9].z  = VertexBuffer[4].z
+
+	VertexBuffer[10].x = VertexBuffer[5].x
+	VertexBuffer[10].y = VertexBuffer[5].y
+	VertexBuffer[10].z = VertexBuffer[5].z
+
+	VertexBuffer[11].x = VertexBuffer[1].x
+	VertexBuffer[11].y = VertexBuffer[1].y
+	VertexBuffer[11].z = VertexBuffer[1].z
+end function
+
+private function SignPost_DrawFrontFace
+	VertexBuffer[12].x  = VertexBuffer[3].x
+	VertexBuffer[12].y  = VertexBuffer[3].y
+	VertexBuffer[12].z  = VertexBuffer[3].z
+	VertexBuffer[12].x += 1
+
+	VertexBuffer[13].x  = VertexBuffer[2].x
+	VertexBuffer[13].y  = VertexBuffer[2].y
+	VertexBuffer[13].z  = VertexBuffer[2].z
+	VertexBuffer[13].x += 1
+
+	VertexBuffer[14].x  = VertexBuffer[6].x
+	VertexBuffer[14].y  = VertexBuffer[6].y
+	VertexBuffer[14].z  = VertexBuffer[6].z
+	VertexBuffer[14].x -= 1
+
+	VertexBuffer[15].x  = VertexBuffer[7].x
+	VertexBuffer[15].y  = VertexBuffer[7].y
+	VertexBuffer[15].z  = VertexBuffer[7].z
+	VertexBuffer[15].x -= 1
+end function
+
+private function SignPost_DrawLeftFace
+	VertexBuffer[16].x  = VertexBuffer[1].x
+	VertexBuffer[16].y  = VertexBuffer[1].y
+	VertexBuffer[16].z  = VertexBuffer[1].z
+
+	VertexBuffer[17].x  = VertexBuffer[5].x
+	VertexBuffer[17].y  = VertexBuffer[5].y
+	VertexBuffer[17].z  = VertexBuffer[5].z
+
+	VertexBuffer[18].x  = VertexBuffer[6].x
+	VertexBuffer[18].y  = VertexBuffer[6].y
+	VertexBuffer[18].y += 5
+	VertexBuffer[18].z  = VertexBuffer[6].z
+
+	VertexBuffer[19].x  = VertexBuffer[2].x
+	VertexBuffer[19].y  = VertexBuffer[2].y
+	VertexBuffer[19].y += 5
+	VertexBuffer[19].z  = VertexBuffer[2].z
+end function
+
+private function SignPost_DrawRightFace
+	VertexBuffer[20].x  = VertexBuffer[0].x
+	VertexBuffer[20].y  = VertexBuffer[0].y
+	VertexBuffer[20].z  = VertexBuffer[0].z
+
+	VertexBuffer[21].x  = VertexBuffer[3].x
+	VertexBuffer[21].y  = VertexBuffer[3].y
+	VertexBuffer[21].y += 5
+	VertexBuffer[21].z  = VertexBuffer[3].z
+
+	VertexBuffer[22].x  = VertexBuffer[7].x
+	VertexBuffer[22].y  = VertexBuffer[7].y
+	VertexBuffer[22].y += 5
+	VertexBuffer[22].z  = VertexBuffer[7].z
+
+	VertexBuffer[23].x  = VertexBuffer[4].x
+	VertexBuffer[23].y  = VertexBuffer[4].y
+	VertexBuffer[23].z  = VertexBuffer[4].z
+end function
+
+private function SignPost_DrawTopSideFace
+	// Get the center of the object
+	object.XCenter = 0
+	object.YCenter = 0
+	object.ZCenter = 0
+	
+	ArrayPos0 = 0
+	while ArrayPos0 < 8
+		temp0  = arrayPos0
+		temp0 *= 3
+		GetTableValue(object.XVectorPoint, temp0, SignPost_VectorPointSignTop)
+		temp0++
+		GetTableValue(object.YVectorPoint, temp0, SignPost_VectorPointSignTop)
+		temp0++
+		GetTableValue(object.ZVectorPoint, temp0, SignPost_VectorPointSignTop)
+		object.XCenter += object.XVectorPoint
+		object.YCenter += object.YVectorPoint
+		object.ZCenter += object.ZVectorPoint
+		ArrayPos0++
+	loop
+	object.XCenter /= 8
+	object.YCenter /= 8
+	object.ZCenter /= 8
+	
+	arrayPos0 = 0
+	while arrayPos0 < 8
+		temp0  = arrayPos0
+		temp0 *= 3
+		GetTableValue(object.XVectorPoint, temp0, SignPost_VectorPointSignTop)
+		temp0++
+		GetTableValue(object.YVectorPoint, temp0, SignPost_VectorPointSignTop)
+		temp0++
+		GetTableValue(object.ZVectorPoint, temp0, SignPost_VectorPointSignTop)
+		object.pointX = object.XVectorPoint
+		object.pointY = object.YVectorPoint
+		object.pointZ = object.ZVectorPoint
+
+		// Rotate X
+		// X
+		temp0   = object.pointX
+		temp0  -= object.XCenter
+		cos(object.angle, object.SpinRot)
+		temp0  *= object.angle
+
+		temp1   = object.pointZ
+		temp1  -= object.ZCenter
+		sin(object.angle, object.SpinRot)
+		temp1  *= object.angle
+		temp2   = temp0
+		temp2  -= temp1
+
+		// Y
+		temp0   = object.pointX
+		temp0  -= object.XCenter
+		Sin(object.angle, object.SpinRot)
+		temp0  *= object.angle
+
+		temp1   = object.pointZ
+		temp1  -= object.ZCenter
+		Cos(object.angle, object.SpinRot)
+		temp1  *= object.angle
+		temp3   = temp0
+		temp3  += temp1
+
+
+		temp2  += object.XCenter
+		temp3  += object.ZCenter
+		temp2 >>= 8
+		temp3 >>= 8
+		
+		ArrayPos1  = arrayPos0
+		ArrayPos1 += 24
+		VertexBuffer[ArrayPos1].x  = object.XCenter
+		VertexBuffer[ArrayPos1].x += temp2
+		VertexBuffer[ArrayPos1].z  = object.ZCenter
+		VertexBuffer[ArrayPos1].z += temp3
+		VertexBuffer[ArrayPos1].y  = object.pointY
+		ArrayPos0++
+	loop
+end function
+
+// ========================
+// Events
+// ========================
+
+event ObjectUpdate
+	switch object.state
+	case SIGNPOST_AWAITPLAYER
+		temp0  = Object.XPos
+		temp0 -= 0x1000000
+		if Player[0].XPos > temp0
+			Stage.NewYBoundary1   = Object.YPos
+			Stage.NewYBoundary1 >>= 16
+			Stage.NewYBoundary1  -= Screen.ycenter
+			Stage.NewYBoundary2   = Object.YPos
+			Stage.NewYBoundary2 >>= 16
+			Stage.NewYBoundary2  += Screen.ycenter
+			Stage.NewYBoundary2  -= 32
+		end if
+
+		temp0 = object.ypos
+		temp0 += 0x400000
+		if player[0].ypos < temp0
+			stage.newXBoundary1 = object.xpos
+			stage.newXBoundary1 >>= 16
+			stage.newXBoundary1 -= screen.xcenter
+			stage.newXBoundary1 -= screen.xcenter
+			stage.newXBoundary2 = object.xpos
+			stage.newXBoundary2 >>= 16
+			stage.newXBoundary2 += screen.xcenter
+			if player[0].xpos > object.xpos
+				stage.newXBoundary1 = object.xpos
+				stage.newXBoundary1 >>= 16
+				stage.newXBoundary1 -= screen.xcenter
+				
+				if stage.debugMode == false
+					if stage.listPos == 0
+						if stage.minutes == 0
+							if stage.seconds < 30
+								// Grant the "Blast Processing" Achievement
+								CallNativeFunction2(SetAchievement, ACHIEVEMENT_BLASTPROCESSING, 100)
+							end if
+						end if
+					end if
+				end if
+
+#platform: USE_ORIGINS
+				CallNativeFunction2(NotifyCallback, NOTIFY_TOUCH_SIGNPOST, 0)
+#endplatform
+				stage.timeEnabled = false
+				object.state = SIGNPOST_SPINNING
+				object.rotIncrease = 32
+				PlaySfx(SfxName[Sign Post], false)
+				if Player_superState == SUPERSTATE_SUPER
+					Player_superState = SUPERSTATE_UNTRANSFORM
+				end if
+			end if
+		end if
+		break
+
+	case SIGNPOST_SPINNING
+		music.volume--
+
+		object.spinRot += object.rotIncrease
+		object.spinRot &= 0x1FF
+
+		object.timer++
+		if object.timer == 2
+			object.timer = 0
+			object.frame++
+			if object.frame == 5
+				object.frame = 1
+				Rand(temp0, 48)
+				temp0 <<= 16
+				temp0 += object.xpos
+				temp0 -= 0x180000
+				Rand(temp1, 32)
+				temp1 <<= 16
+				temp1 += object.ypos
+				temp1 -= 0x140000
+				CreateTempObject(TypeName[Ring Sparkle], 0, temp0, temp1)
+
+				object.spinCount--
+			end if
+			
+			if Object.Frame == 9
+				object.rotIncrease -= 2
+				if object.rotIncrease < 4
+					object.rotIncrease = 4
+				end if
+				object.frame = 1
+			end if
+
+			if object.spinCount <= 0
+				if object.spinRot >= 128
+					if object.spinRot <= 144
+						object.spinRot = 0
+						object.rotIncrease = 0
+						if player[0].type == TypeName[Blank Object]
+							object.state = SIGNPOST_TOSPECIALSTAGE
+
+							if object.propertyValue < 3
+								PlayMusic(TRACK_ACTFINISH)
+							else
+								if object.outOfBounds == false
+									PlayMusic(TRACK_ACTFINISH)
+								end if
+							end if
+
+							object[SLOT_ACTFINISH].type = TypeName[Act Finish]
+							object[SLOT_ACTFINISH].drawOrder = 6
+							object[SLOT_ACTFINISH].priority = PRIORITY_ACTIVE
+							
+							player[0].controlMode = CONTROLMODE_NONE
+							player[0].interaction = false
+							
+							if stage.player2Enabled == true
+								player[1].interaction 	= false
+								player[1].controlMode 	= CONTROLMODE_NONE
+								player[1].up 			= false
+								player[1].down 			= false
+								player[1].left 			= false
+								player[1].jumpPress 	= false
+								player[1].jumpHold 		= false
+							end if
+						else
+							player[0].controlMode 	= CONTROLMODE_NONE
+							player[0].interaction 	= false
+							player[0].up 			= false
+							player[0].down 			= false
+							player[0].left 			= false
+							player[0].jumpPress 	= false
+							player[0].jumpHold 		= false
+							if stage.player2Enabled == true
+								player[1].controlMode 	= CONTROLMODE_NONE
+								player[1].interaction 	= false
+								player[1].up 			= false
+								player[1].down 			= false
+								player[1].left 			= false
+								player[1].jumpPress 	= false
+								player[1].jumpHold 		= false
+							end if
+
+							object.state = SIGNPOST_HANDLEACTFINISH
+						end if
+					end if
+				end if
+			end if
+		end if
+
+		temp0 = 40
+		temp0 += screen.xcenter
+		temp0 <<= 16
+		temp0 += object.xpos
+		if player[0].xpos > temp0
+			player[0].xpos = temp0
+			player[0].speed = 0
+			player[0].xvel = 0
+		end if
+
+		if stage.player2Enabled == true
+			if player[1].xpos > temp0
+				player[1].xpos = temp0
+				player[1].speed = 0
+				player[1].xvel = 0
+			end if
+		end if
+		break
+
+	case SIGNPOST_HANDLEACTFINISH
+		if player[0].type == TypeName[Blank Object]
+			object.state = SIGNPOST_TOSPECIALSTAGE
+			
+			if object.propertyValue < 3
+				PlayMusic(TRACK_ACTFINISH)
+			else
+				if object.outOfBounds == false
+					PlayMusic(TRACK_ACTFINISH)
+				end if
+			end if
+			object[SLOT_ACTFINISH].type = TypeName[Act Finish]
+			object[SLOT_ACTFINISH].drawOrder = 6
+			object[SLOT_ACTFINISH].priority = PRIORITY_ACTIVE
+		end if
+
+		if player[0].controlMode == CONTROLMODE_NONE
+			player[0].right = true
+		end if
+
+		if stage.player2Enabled == true
+			player[1].controlMode = player[0].controlMode
+			if player[1].controlMode == CONTROLMODE_NONE
+				if player[1].left == false
+					player[1].right = true
+				end if
+			end if
+		end if
+
+		temp0 = screen.xcenter
+		temp0 <<= 16
+		temp0 += object.xpos
+		if player[0].xpos > temp0
+			if object.propertyValue < 3
+				PlayMusic(TRACK_ACTFINISH)
+			else
+				if object.outOfBounds == false
+					PlayMusic(TRACK_ACTFINISH)
+				end if
+			end if
+
+			object.state = SIGNPOST_EXITSTAGERIGHT
+			object[SLOT_ACTFINISH].type = TypeName[Act Finish]
+			object[SLOT_ACTFINISH].drawOrder = 6
+			object[SLOT_ACTFINISH].priority = PRIORITY_ACTIVE
+#platform: USE_ORIGINS
+		else
+			if player[0].animation == ANI_PUSHING
+				PlayMusic(TRACK_ACTFINISH)
+				object.state = SIGNPOST_TOSPECIALSTAGE
+				object[SLOT_ACTFINISH].type = TypeName[Act Finish]
+				object[SLOT_ACTFINISH].drawOrder = 6
+				object[SLOT_ACTFINISH].priority = PRIORITY_ACTIVE
+			end if
+#endplatform
+
+		end if
+		break
+
+	case SIGNPOST_EXITSTAGERIGHT
+		if player[0].controlMode == CONTROLMODE_NONE
+			player[0].right = true
+		end if
+
+		temp0 = 40
+		temp0 += screen.xcenter
+		temp0 <<= 16
+		temp0 += object.xpos
+		if player[0].xpos > temp0
+			player[0].xpos = temp0
+			player[0].speed = 0
+			player[0].xvel = 0
+		end if
+
+		if stage.player2Enabled == true
+			if player[1].controlMode == CONTROLMODE_NONE
+				player[1].right = true
+			end if
+
+			if player[1].xpos > temp0
+				player[1].xpos = temp0
+				player[1].speed = 0
+				player[1].xvel = 0
+			end if
+		end if
+		break
+
+	case SIGNPOST_TOSPECIALSTAGE
+		if stage.player2Enabled == true
+			temp0 = 40
+			temp0 += screen.xcenter
+			temp0 <<= 16
+			temp0 += object.xpos
+			player[1].right = true
+			player[1].controlMode = CONTROLMODE_NONE
+			if player[1].xpos > temp0
+				player[1].xpos = temp0
+				player[1].speed = 0
+				player[1].xvel = 0
+			end if
+		end if
+		break
+		
+	// "SIGNPOST_BLANK" doesn't have anything, it's set by Act Finish in SBZ2 for the transition
+	
+	end switch
+
+#platform: USE_ORIGINS
+	if game.playMode == BOOT_PLAYMODE_MISSION
+		if object.state > SIGNPOST_AWAITPLAYER
+			player[0].invincibleTimer = 80
+			
+			if object.state > SIGNPOST_SPINNING
+				CheckCurrentStageFolder("Mission_Zone02") // Marble Zone - Mission Mode
+				temp0 = checkResult
+				CheckEqual(stage.actNum, 1) // "Ring Rush" (M019)
+				checkResult &= temp0
+				player[0].interaction = checkResult
+			end if
+		end if
+	end if
+#endplatform
+end event
+
+
+event ObjectDraw
+	DrawSprite(0)
+
+	if object.state > SIGNPOST_AWAITPLAYER
+		CallFunction(SignPost_GetBoxCenter)
+
+		// Rotate the points
+		CallFunction(SignPost_GetRotation)
+		CallFunction(SignPost_DrawBackFace)
+		CallFunction(SignPost_DrawFrontFace)
+		CallFunction(SignPost_DrawLeftFace)
+		CallFunction(SignPost_DrawRightFace)
+
+		CallFunction(SignPost_DrawTopSideFace)
+
+		temp0   = object.ixpos
+		temp0  -= screen.xoffset
+		temp0  *= 2
+		temp0  -= screen.xsize
+		temp0  -= 4
+
+		temp1   = object.iypos
+		temp1  -= screen.yoffset
+		temp1  -= 76
+		temp1  *= 2
+		temp1  -= 0x38
+		Not(temp1)
+		if object.rotIncrease != 0
+			MatrixTranslateXYZ(MAT_WORLD, temp0, temp1, 0x150)
+			Draw3DScene()
+		else
+			DrawSprite(5)
+		end if
+	else
+		DrawSprite(1)
+	end if
+end event
+
+
+event ObjectStartup
+	if stage.playerListPos == PLAYER_AMY_A
+		LoadSpriteSheet("Global/ItemsA.gif")
+	else
+		LoadSpriteSheet("Global/Items2.gif")
+	end if
+	
+	SpriteFrame(-24, 16, 48, 16, 34, 214)
+	switch stage.playerListPos
+	case PLAYER_SONIC_A
+		SpriteFrame(-24, -16, 48, 32, 34, 182)
+		SpriteFrame(-16, -16, 32, 32, 1, 150)
+		SpriteFrame(-4, -16, 8, 32, 189, 131)
+		SpriteFrame(-16, -16, 32, 32, 1, 183)
+		SpriteFrame(-24, -16, 48, 32, 34, 83)
+		SpriteFrame(-16, -16, 32, 32, 1, 150)
+		SpriteFrame(-4, -16, 8, 32, 189, 131)
+		SpriteFrame(-16, -16, 32, 32, 1, 183)
+		break
+		
+	case PLAYER_TAILS_A
+		SpriteFrame(-24, -16, 48, 32, 34, 182)
+		SpriteFrame(-16, -16, 32, 32, 83, 131)
+		SpriteFrame(-4, -16, 8, 32, 189, 131)
+		SpriteFrame(-16, -16, 32, 32, 83, 163)
+		SpriteFrame(-24, -16, 48, 32, 34, 116)
+		SpriteFrame(-16, -16, 32, 32, 83, 131)
+		SpriteFrame(-4, -16, 8, 32, 189, 131)
+		SpriteFrame(-16, -16, 32, 32, 83, 163)
+		break
+		
+	case PLAYER_KNUCKLES_A
+		SpriteFrame(-24, -16, 48, 32, 34, 182)
+		SpriteFrame(-16, -16, 32, 32, 83, 131)
+		SpriteFrame(-4, -16, 8, 32, 189, 131)
+		SpriteFrame(-16, -16, 32, 32, 83, 163)
+		SpriteFrame(-24, -16, 48, 32, 34, 149)
+		SpriteFrame(-16, -16, 32, 32, 83, 131)
+		SpriteFrame(-4, -16, 8, 32, 189, 131)
+		SpriteFrame(-16, -16, 32, 32, 83, 163)
+		break
+		
+	case PLAYER_AMY_A
+		SpriteFrame(-24, -16, 48, 32, 34, 182)
+		SpriteFrame(-16, -16, 32, 32, 1, 150)
+		SpriteFrame(-4, -16, 8, 32, 189, 131)
+		SpriteFrame(-16, -16, 32, 32, 1, 183)
+		SpriteFrame(-24, -16, 48, 32, 34, 83)
+		SpriteFrame(-16, -16, 32, 32, 1, 150)
+		SpriteFrame(-4, -16, 8, 32, 189, 131)
+		SpriteFrame(-16, -16, 32, 32, 1, 183)
+		break
+	end switch
+	
+	foreach (TypeName[Sign Post], arrayPos0, ALL_ENTITIES)
+		object[arrayPos0].frame = 1
+		object[arrayPos0].spinCount = 16
+		object[arrayPos0].priority = PRIORITY_XBOUNDS
+	next
+	
+	SetTableValue(TypeName[Sign Post], DebugMode_ObjCount, DebugMode_TypesTable)
+	SetTableValue(SignPost_DebugDraw, DebugMode_ObjCount, DebugMode_DrawTable)
+	SetTableValue(SignPost_DebugSpawn, DebugMode_ObjCount, DebugMode_SpawnTable)
+	DebugMode_ObjCount++
+	
+	scene3D.vertexCount = 0
+	scene3D.faceCount   = 0
+	
+	// reset matrix
+	MatrixTranslateXYZ(MAT_WORLD, 0, 0, 0)
+	MatrixTranslateXYZ(MAT_VIEW, 0, 0, 0)
+	MatrixRotateZ(MAT_WORLD, 0)
+	ArrayPos0 = 0
+	ArrayPos1 = 0
+	// Face corner setup
+	while ArrayPos0 < 32
+		// Top Left
+		FaceBuffer[ArrayPos1].a  = ArrayPos0
+		// Top Right
+		FaceBuffer[ArrayPos1].b  = ArrayPos0
+		FaceBuffer[ArrayPos1].b += 2
+		// Bottom Left
+		FaceBuffer[ArrayPos1].c  = ArrayPos0
+		FaceBuffer[ArrayPos1].c += 1
+		// Bottom Right
+		FaceBuffer[ArrayPos1].d  = ArrayPos0
+		FaceBuffer[ArrayPos1].d += 3
+	
+		ArrayPos1++
+		ArrayPos0 += 4
+	loop
+
+	// Face rendering
+	FaceBuffer[0].Flag  = FACE_TEXTURED_3D
+
+	FaceBuffer[1].Flag  = FACE_TEXTURED_3D
+
+	FaceBuffer[2].Flag  = FACE_COLOURED_3D
+	faceBuffer[2].Color = 0xFF303030
+
+	FaceBuffer[3].Flag  = FACE_COLOURED_3D
+	faceBuffer[3].Color = 0xFFE0E0E0
+
+	FaceBuffer[4].Flag  = FACE_TEXTURED_3D
+
+	FaceBuffer[5].Flag  = FACE_TEXTURED_3D
+
+	FaceBuffer[6].Flag  = FACE_TEXTURED_3D
+	FaceBuffer[7].Flag  = FACE_TEXTURED_3D
+
+	// account for all vertices and faces
+	scene3D.vertexCount += 32
+	scene3D.faceCount   += 8
+	
+	// Back Texture
+	// side of the box
+	VertexBuffer[0].u = 189
+	VertexBuffer[0].v = 163
+	VertexBuffer[1].u = 197
+	VertexBuffer[1].v = 163
+	VertexBuffer[2].u = 197
+	VertexBuffer[2].v = 134
+	VertexBuffer[3].u = 189
+	VertexBuffer[3].v = 134
+
+	// Front Texture
+	// uses solid color
+	VertexBuffer[4].u = 189
+	VertexBuffer[4].v = 163
+	VertexBuffer[5].u = 197
+	VertexBuffer[5].v = 163
+	VertexBuffer[6].u = 197
+	VertexBuffer[6].v = 134
+	VertexBuffer[7].u = 189
+	VertexBuffer[7].v = 134
+
+	// Left Texture
+	// Front of the box
+	VertexBuffer[16].u = 82
+	VertexBuffer[16].v = 214
+	VertexBuffer[17].u = 34
+	VertexBuffer[17].v = 214
+	VertexBuffer[18].u = 34
+	VertexBuffer[18].v = 182
+	VertexBuffer[19].u = 82
+	VertexBuffer[19].v = 182
+
+	// Right Texture
+	// Back of the box
+
+	switch stage.playerListPos
+	case PLAYER_TAILS_A
+		VertexBuffer[20].u = 82
+		VertexBuffer[20].v = 148
+		VertexBuffer[21].u = 82
+		VertexBuffer[21].v = 116
+		VertexBuffer[22].u = 34
+		VertexBuffer[22].v = 116
+		VertexBuffer[23].u = 34
+		VertexBuffer[23].v = 148
+		break
+	case PLAYER_KNUCKLES_A
+	case PLAYER_KNUCKLES_TAILS_A
+		VertexBuffer[20].u = 82
+		VertexBuffer[20].v = 181
+		VertexBuffer[21].u = 82
+		VertexBuffer[21].v = 149
+		VertexBuffer[22].u = 34
+		VertexBuffer[22].v = 149
+		VertexBuffer[23].u = 34
+		VertexBuffer[23].v = 181
+		break
+	default
+		VertexBuffer[20].u = 82
+		VertexBuffer[20].v = 115
+		VertexBuffer[21].u = 82
+		VertexBuffer[21].v = 83
+		VertexBuffer[22].u = 34
+		VertexBuffer[22].v = 83
+		VertexBuffer[23].u = 34
+		VertexBuffer[23].v = 115
+	end switch
+
+	// Signpost top
+	VertexBuffer[24].u = 189
+	VertexBuffer[24].v = 134
+	VertexBuffer[25].u = 197
+	VertexBuffer[25].v = 134
+	VertexBuffer[26].u = 197
+	VertexBuffer[26].v = 131
+	VertexBuffer[27].u = 189
+	VertexBuffer[27].v = 131
+	
+	VertexBuffer[28].u = 189
+	VertexBuffer[28].v = 134
+	VertexBuffer[29].u = 197
+	VertexBuffer[29].v = 134
+	VertexBuffer[30].u = 197
+	VertexBuffer[30].v = 131
+	VertexBuffer[31].u = 189
+	VertexBuffer[31].v = 131
+end event
+
+
+// ========================
+// Editor Events
+// ========================
+
+event RSDKEdit
+	if editor.returnVariable == true
+		switch editor.variableID
+		case EDIT_VAR_PROPVAL // property value
+			checkResult = object.propertyValue
+			break
+			
+		case 0 // type
+			checkResult = object.propertyValue
+			break
+			
+		end switch
+	else
+		switch editor.variableID
+		case EDIT_VAR_PROPVAL // property value
+			object.propertyValue = editor.variableValue
+			break
+			
+		case 0 // type
+			object.propertyValue = editor.variableValue
+			break
+			
+		end switch
+	end if
+end event
+
+
+event RSDKDraw
+	DrawSprite(0)
+	DrawSprite(1)
+end event
+
+
+event RSDKLoad
+	LoadSpriteSheet("Global/Items2.gif")
+	SpriteFrame(-24, 16, 48, 16, 34, 132)
+	SpriteFrame(-24, -16, 48, 32, 34, 100)
+
+	AddEditorVariable("type")
+	SetActiveVariable("type")
+	AddEnumVariable("Normal", 0)
+	AddEnumVariable("VS Only (No Y Bounds)", 1)
+	AddEnumVariable("VS Only (Use Y Bounds)", 2)
+end event

@@ -1,0 +1,94 @@
+{
+    "Groups": [
+      {
+        "Name": "Main",
+        "DisplayName": "Graphics",
+        "Elements": [
+          {
+            "Name": "IncludeDir1",
+            "Description": [
+              "Improves rendering of the 3D Signpost, at the cost of reduced compatibility with other signpost sprite mods"
+            ],
+            "DisplayName": "CD Spritesheet Optimization",
+            "Type": "CDOptEnum",
+            "MinValue": null,
+            "MaxValue": null,
+            "DefaultValue": ".\\CDSpriteOptimization/Enabled\\"
+          },
+          {
+            "Name": "IncludeDir2",
+            "Description": [
+              "Improves rendering of the 3D Signpost, at the cost of reduced compatibility with other signpost sprite mods"
+            ],
+            "DisplayName": "S1 Spritesheet Optimization",
+            "Type": "S1OptEnum",
+            "MinValue": null,
+            "MaxValue": null,
+            "DefaultValue": ".\\S1SpriteOptimization/Enabled\\"
+          },
+          {
+            "Name": "IncludeDir3",
+            "Description": [
+              "Improves rendering of the 3D Signpost, at the cost of reduced compatibility with other signpost sprite mods"
+            ],
+            "DisplayName": "S2 Spritesheet Optimization",
+            "Type": "S2OptEnum",
+            "MinValue": null,
+            "MaxValue": null,
+            "DefaultValue": ".\\S2SpriteOptimization/Enabled\\"
+          }
+        ]
+      }
+    ],
+    "Enums": {
+      "CDOptEnum": [
+        {
+          "DisplayName": "Enabled (Default)",
+          "Value": ".\\CDSpriteOptimization/Enabled\\",
+          "Description": [
+            "3D signpost will display correctly, at the cost of reduced compatibility out of the box"
+          ]
+        },
+        {
+          "DisplayName": "Disabled",
+          "Value": ".\\CDSpriteOptimization/Disabled\\",
+          "Description": [
+            "3D signpost will display visual artifacts unless another mod optimizes the spritesheet"
+          ]
+        }
+      ],
+      "S1OptEnum": [
+        {
+          "DisplayName": "Enabled (Default)",
+          "Value": ".\\S1SpriteOptimization/Enabled\\",
+          "Description": [
+            "3D signpost will display correctly, at the cost of reduced compatibility out of the box"
+          ]
+        },
+        {
+          "DisplayName": "Disabled",
+          "Value": ".\\S1SpriteOptimization/Disabled\\",
+          "Description": [
+            "3D signpost will display visual artifacts unless another mod optimizes the spritesheet"
+          ]
+        }
+      ],
+      "S2OptEnum": [
+        {
+          "DisplayName": "Enabled (Default)",
+          "Value": ".\\S2SpriteOptimization/Enabled\\",
+          "Description": [
+            "3D signpost will display correctly, at the cost of reduced compatibility out of the box"
+          ]
+        },
+        {
+          "DisplayName": "Disabled",
+          "Value": ".\\S2SpriteOptimization/Disabled\\",
+          "Description": [
+            "3D signpost will display visual artifacts unless another mod optimizes the spritesheet"
+          ]
+        }
+      ]
+    },
+    "IniFile": "mod.ini"
+  }
